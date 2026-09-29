@@ -147,32 +147,6 @@
             transform: translate(-50%, -50%) translateX(-15px) rotate(90deg) scale(0.3);
         }
 
-        .splash-text {
-            margin-top: 35px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            color: #444;
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            transition: color 0.5s, text-shadow 0.5s, letter-spacing 0.5s;
-        }
-
-        .lock-scene.opening~.splash-text {
-            color: var(--accent);
-            text-shadow: 0 0 12px rgba(255, 51, 51, 0.6);
-            letter-spacing: 7px;
-        }
-
-        .splash-terminal {
-            margin-top: 20px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            color: var(--text-muted);
-            height: 15px;
-            width: 300px;
-            text-align: center;
-        }
-
         .container {
             max-width: 1100px;
             margin: 0 auto;
@@ -214,39 +188,84 @@
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8), 0 0 20px var(--accent-glow);
         }
 
-        .lang-selector {
+        .lang-dropdown {
             position: fixed;
             top: 24px;
             right: 24px;
             z-index: 100;
-            display: flex;
-            gap: 4px;
-            padding: 6px;
+            min-width: 80px;
+            cursor: none;
             border-radius: 10px;
         }
 
+        .lang-current {
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-primary);
+        }
+
+        .lang-current .flag,
+        .lang-btn .flag {
+            width: 16px;
+            height: 11px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
+        .lang-list {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 100%;
+            margin-top: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            backdrop-filter: blur(12px);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .lang-dropdown.open .lang-list {
+            display: flex;
+        }
+
         .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
             background: transparent;
             border: none;
             color: var(--text-secondary);
             font-family: 'JetBrains Mono', monospace;
             font-size: 11px;
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
+            cursor: none;
             transition: var(--transition);
         }
 
         .lang-btn:hover {
+            background: rgba(255, 51, 51, 0.1);
             color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-btn .flag {
+            filter: grayscale(100%) sepia(100%) hue-rotate(315deg) saturate(500%) brightness(0.6);
+            transition: var(--transition);
+        }
+
+        .lang-btn.active .flag {
+            filter: none;
         }
 
         .lang-btn.active {
-            color: var(--bg-main);
-            background: var(--accent);
-            font-weight: 600;
-            box-shadow: 0 0 10px var(--accent-glow);
+            color: var(--accent);
+            background: rgba(255, 51, 51, 0.05);
         }
 
         .sidebar {
@@ -294,7 +313,15 @@
             animation: spin 4s linear infinite;
         }
 
-        .name { position: relative; font-size: 24px; font-weight: 600; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; color: #fff; }
+        .name {
+            position: relative;
+            font-size: 24px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
         .name:hover {
             color: var(--accent);
             text-shadow: 0 0 10px var(--accent-glow);
@@ -418,7 +445,7 @@
 
         .expertise-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 16px;
         }
 
@@ -602,42 +629,412 @@
             background: var(--accent);
         }
 
-        body, a, button { cursor: none; }
-        .cursor-dot, .cursor-ring {
+        body,
+        a,
+        button,
+        input,
+        textarea,
+        select {
+            cursor: none !important;
+        }
+
+        .cursor-dot,
+        .cursor-ring {
             position: fixed;
             pointer-events: none;
             z-index: 10000;
             transform: translate(-50%, -50%);
         }
+
         .cursor-dot {
-            width: 6px; height: 6px;
+            width: 6px;
+            height: 6px;
             background: var(--accent);
             border-radius: 50%;
             transition: width 0.2s, height 0.2s;
         }
+
         .cursor-ring {
-            width: 30px; height: 30px;
+            width: 30px;
+            height: 30px;
             border: 1px solid rgba(255, 51, 51, 0.4);
             border-radius: 50%;
-            transition: width 0.2s, height 0.2s, transform 0.1s ease-out;
-        }
-        .cursor-active .cursor-ring {
-            width: 50px; height: 50px;
-            background: rgba(255, 51, 51, 0.05);
-            border-color: rgba(255, 51, 51, 0.8);
-        }
-        .cursor-active .cursor-dot {
-            width: 0; height: 0;
+            transition: transform 0.1s ease-out;
         }
 
         .tech-badge {
-            font-size: 10px; font-family: 'JetBrains Mono', monospace;
-            padding: 4px 8px; background: rgba(255, 51, 51, 0.05);
-            color: var(--accent); border-radius: 6px;
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 4px 8px;
+            background: rgba(255, 51, 51, 0.05);
+            color: var(--accent);
+            border-radius: 6px;
             border: 1px solid rgba(255, 51, 51, 0.15);
             transition: var(--transition);
         }
-        .tech-badge:hover { background: rgba(255, 51, 51, 0.15); transform: translateY(-2px); }
+
+        .tech-badge:hover {
+            background: rgba(255, 51, 51, 0.15);
+            transform: translateY(-2px);
+        }
+
+        [data-i18n] {
+            transition: opacity 0.25s ease;
+        }
+
+        .text-fading {
+            opacity: 0 !important;
+        }
+
+        .nav-switcher {
+            display: flex;
+            gap: 10px;
+            padding: 8px;
+            margin-bottom: 30px;
+        }
+
+        .nav-tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 18px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .nav-tab:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .nav-tab.active {
+            color: #fff;
+            background: rgba(255, 51, 51, 0.12);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .nav-badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--accent);
+            color: #000;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .tab-pane.pane-fading {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        .tool-nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .tool-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .tool-tab:hover {
+            color: #fff;
+            border-color: rgba(255, 51, 51, 0.4);
+        }
+
+        .tool-tab.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(255, 51, 51, 0.08);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .tool-panel {
+            padding: 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .file-dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 30px 16px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+            cursor: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .file-dropzone.dragover,
+        .file-dropzone:hover {
+            border-color: var(--accent);
+            background: rgba(255, 51, 51, 0.05);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .cyber-input,
+        .cyber-textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            padding: 10px 14px;
+            transition: var(--transition);
+            outline: none;
+            cursor: none;
+            resize: vertical;
+        }
+
+        .cyber-input:focus,
+        .cyber-textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .cyber-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .cyber-btn:hover {
+            background: rgba(255, 51, 51, 0.1);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .cyber-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .entropy-gauge-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .entropy-bar-bg {
+            flex: 1;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .entropy-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #7bd88f, #f7931a, #ff3333);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        #entropyCanvas {
+            width: 100%;
+            height: 90px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: block;
+        }
+
+        .hash-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .hash-row:hover {
+            border-color: var(--border-hover);
+            background: rgba(255, 51, 51, 0.03);
+        }
+
+        .hash-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent);
+            min-width: 80px;
+        }
+
+        .hash-val {
+            flex: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #fff;
+            word-break: break-all;
+            user-select: all;
+        }
+
+        .copy-cyber-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 7px 12px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            cursor: none;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .copy-cyber-btn:hover {
+            background: rgba(255, 51, 51, 0.15);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .copy-cyber-btn.copied {
+            background: var(--accent);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .hex-dump-pre {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            color: #e0e0e0;
+            overflow-x: auto;
+            max-height: 280px;
+            white-space: pre;
+        }
+
+        .cyber-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            cursor: none;
+        }
+
+        .cyber-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: none;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .cyber-pill-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: none;
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        .cyber-pill-toggle.active {
+            border-color: var(--accent);
+            background: rgba(255, 51, 51, 0.1);
+            color: #fff;
+        }
+
+        .crackme-console {
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            min-height: 100px;
+            color: #888;
+            overflow-y: auto;
+            max-height: 200px;
+            white-space: pre-wrap;
+        }
+
+        .crackme-code-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #ddd;
+            overflow-x: auto;
+            white-space: pre;
+        }
     </style>
 </head>
 
@@ -665,17 +1062,26 @@
                 <path d="M32 43 L32 48" stroke="currentColor" stroke-width="2" />
             </svg>
         </div>
-        <div class="splash-text" id="splashText">INITIALIZING_SESSION</div>
-        <div class="splash-terminal" id="splashTerm"></div>
     </div>
 
-    <div class="lang-selector glass-panel" id="langSelector">
-        <button class="lang-btn active" data-lang="en">EN</button>
-        <button class="lang-btn" data-lang="tr">TR</button>
-        <button class="lang-btn" data-lang="de">DE</button>
-        <button class="lang-btn" data-lang="ru">RU</button>
-        <button class="lang-btn" data-lang="zh">ZH</button>
-        <button class="lang-btn" data-lang="he">HE</button>
+    <div class="lang-dropdown glass-panel" id="langDropdown">
+        <div class="lang-current" id="langCurrent">
+            <img src="https://flagcdn.com/w20/us.png" class="flag" alt="EN"> EN
+        </div>
+        <div class="lang-list" id="langList">
+            <button class="lang-btn active" data-lang="en" data-flag="us"><img src="https://flagcdn.com/w20/us.png"
+                    class="flag" alt="EN"> EN</button>
+            <button class="lang-btn" data-lang="tr" data-flag="tr"><img src="https://flagcdn.com/w20/tr.png"
+                    class="flag" alt="TR"> TR</button>
+            <button class="lang-btn" data-lang="de" data-flag="de"><img src="https://flagcdn.com/w20/de.png"
+                    class="flag" alt="DE"> DE</button>
+            <button class="lang-btn" data-lang="ru" data-flag="ru"><img src="https://flagcdn.com/w20/ru.png"
+                    class="flag" alt="RU"> RU</button>
+            <button class="lang-btn" data-lang="zh" data-flag="cn"><img src="https://flagcdn.com/w20/cn.png"
+                    class="flag" alt="ZH"> ZH</button>
+            <button class="lang-btn" data-lang="he" data-flag="il"><img src="https://flagcdn.com/w20/il.png"
+                    class="flag" alt="HE"> HE</button>
+        </div>
     </div>
 
     <div class="container">
@@ -719,87 +1125,525 @@
         </div>
 
         <div class="content">
-            <div>
-                <div class="section-title" data-i18n="title_about">About Me</div>
-                <div class="bio-text glass-panel" data-i18n="bio">
-                    Deep exploration of low-level Windows internals, reverse engineering, and offensive security
-                    research.
-                    <span class="highlight">I develop advanced evasion tools, custom obfuscators, and UEFI
-                        implementations.</span>
-                    Beyond code, I have advanced proficiency in visual design (Photoshop, Premiere) and game engine
-                    development (Unity).
-                    Operating strictly anonymously. Currently engineering a Linux-based OS designed for 100% anonymity.
-                </div>
-            </div>
-
-            <div>
-                <div class="section-title" data-i18n="title_expertise">Core Expertise</div>
-                <div class="expertise-grid">
-                    <div class="exp-card glass-panel">
-                        <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path
-                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
-                            </path>
-                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                        </svg>
-                        <div class="exp-title" data-i18n="exp_uefi_title">Kernel & UEFI</div>
-                        <div class="exp-desc" data-i18n="exp_uefi_desc">Development of custom UEFI boot modules, driver
-                            mapping techniques, and manipulation of Windows kernel defenses (Patchguard/DSE).</div>
-                    </div>
-                    <div class="exp-card glass-panel">
-                        <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        </svg>
-                        <div class="exp-title" data-i18n="exp_fud_title">Evasion & FUD</div>
-                        <div class="exp-desc" data-i18n="exp_fud_desc">Implementation of advanced evasion methodologies
-                            to bypass dynamic/static analysis, ensuring payloads remain Fully Undetectable (FUD).</div>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <div class="section-title" data-i18n="title_tools">Offensive Tooling</div>
-                <div class="tools-list">
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>PatchGuard Patcher</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Custom Antivirus</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Local Signer Patcher</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Lua Obfuscator</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Lua Deobfuscator</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Private Cheat Reversals</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>P2C Software Cracks</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Anti-Cheat Emulators</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>C++ Protector</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Auth System</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Vanguard Emulator</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>HWID Spoofer</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Stealer Framework</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Evasion Engine</div>
-                </div>
-            </div>
-
-            <div>
-                <div class="section-title" data-i18n="title_creative">Creative Software / Engine</div>
-                <div class="tools-list">
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Unity — 3D FPS</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Unity — 2D Turn-Based</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Photoshop — Advanced</div>
-                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Premiere Pro — Advanced</div>
-                </div>
-            </div>
-
-            <div>
-                <div class="section-title" data-i18n="title_support">Support</div>
-                <div class="btc-card glass-panel">
-                    <svg class="btc-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M23.6 15c-1.6 6.4-8.1 10.3-14.5 8.7C2.7 22.1-1.2 15.6.4 9.2 2 2.8 8.5-1.1 14.9.5c6.4 1.6 10.3 8.1 8.7 14.5zM17.3 10.3c.2-1.6-1-2.5-2.6-3l.5-2.1-1.3-.3-.5 2c-.3-.1-.7-.2-1-.2l.5-2.1-1.3-.3-.5 2.1-2.4-.6-.3 1.4s1 .2 1 .2c.5.1.6.5.6.7l-1.4 5.6c-.1.2-.2.4-.6.3 0 0-.9-.2-.9-.2l-.6 1.5 2.3.6-.5 2.1 1.3.3.5-2.1c.3.1.7.2 1 .3l-.5 2.1 1.3.3.5-2.1c2.2.4 3.8.2 4.5-1.7.6-1.6 0-2.5-1.1-3.1.8-.2 1.4-.7 1.6-1.8zm-3 3.9c-.4 1.6-3 0.7-3.9.5l.7-2.8c.9.2 3.6.7 3.2 2.3zm.4-3.9c-.3 1.4-2.5.7-3.2.5l.6-2.5c.8.2 3.1.5 2.6 2z" />
+            <div class="nav-switcher glass-panel">
+                <button class="nav-tab active" id="tabBtnOverview">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
                     </svg>
-                    <div class="btc-info">
-                        <div class="btc-label" data-i18n="btc_label">Bitcoin Address</div>
-                        <div class="btc-address" id="btcAddr">bc1qt4v9tdactx3q40hsmwegdh7cnj4zgdltckalus</div>
+                    <span data-i18n="nav_overview">OVERVIEW</span>
+                </button>
+                <button class="nav-tab" id="tabBtnTools">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    <span data-i18n="nav_tools">WEB TOOLS</span>
+                    <span class="nav-badge">LAB</span>
+                </button>
+            </div>
+
+            <div id="sectionOverview" class="tab-pane active">
+                <div>
+                    <div class="section-title" data-i18n="title_about">About Me</div>
+                    <div class="bio-text glass-panel" data-i18n="bio">
+                        Deep exploration of low-level Windows internals, reverse engineering, and offensive security
+                        research.
+                        <span class="highlight">I develop advanced evasion tools, custom obfuscators, and UEFI
+                            implementations.</span>
+                        Beyond code, I have advanced proficiency in visual design (Photoshop, Premiere) and game engine
+                        development (Unity).
+                        Operating strictly anonymously. Currently engineering a Linux-based OS designed for 100%
+                        anonymity.
                     </div>
-                    <button class="copy-btn" id="btcCopy" data-i18n="copy_btn">COPY</button>
+                </div>
+
+                <div>
+                    <div class="section-title" data-i18n="title_expertise">Core Expertise</div>
+                    <div class="expertise-grid">
+                        <div class="exp-card glass-panel">
+                            <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                                </path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                            <div class="exp-title" data-i18n="exp_uefi_title">Kernel & UEFI</div>
+                            <div class="exp-desc" data-i18n="exp_uefi_desc">Development of custom UEFI boot modules,
+                                driver
+                                mapping techniques, and manipulation of Windows kernel defenses (Patchguard/DSE).</div>
+                        </div>
+                        <div class="exp-card glass-panel">
+                            <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            <div class="exp-title" data-i18n="exp_fud_title">Evasion & FUD</div>
+                            <div class="exp-desc" data-i18n="exp_fud_desc">Implementation of advanced evasion
+                                methodologies
+                                to bypass dynamic/static analysis, ensuring payloads remain Fully Undetectable (FUD).
+                            </div>
+                        </div>
+                        <div class="exp-card glass-panel">
+                            <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                                </path>
+                                <circle cx="12" cy="12" r="4"></circle>
+                            </svg>
+                            <div class="exp-title" data-i18n="exp_malware_title">Malware Analysis & RE</div>
+                            <div class="exp-desc" data-i18n="exp_malware_desc">Expert in detecting complex malware,
+                                decompiling binaries, and deobfuscating heavily protected payloads.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-title" data-i18n="title_tools">Offensive Tooling</div>
+                    <div class="tools-list">
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>PatchGuard Patcher</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Custom Antivirus</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Local Signer Patcher</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Lua Obfuscator</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Lua Deobfuscator</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Private Cheat Reversals
+                        </div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>P2C Software Cracks</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Anti-Cheat Emulators</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>C++ Protector</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Auth System</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Vanguard Emulator</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>HWID Spoofer</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Stealer Framework</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Evasion Engine</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-title" data-i18n="title_creative">Creative Software / Engine</div>
+                    <div class="tools-list">
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Unity — 3D FPS</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Unity — 2D Turn-Based</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Photoshop — Advanced</div>
+                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Premiere Pro — Advanced
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-title" data-i18n="title_support">Support</div>
+                    <div class="btc-card glass-panel">
+                        <svg class="btc-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M23.6 15c-1.6 6.4-8.1 10.3-14.5 8.7C2.7 22.1-1.2 15.6.4 9.2 2 2.8 8.5-1.1 14.9.5c6.4 1.6 10.3 8.1 8.7 14.5zM17.3 10.3c.2-1.6-1-2.5-2.6-3l.5-2.1-1.3-.3-.5 2c-.3-.1-.7-.2-1-.2l.5-2.1-1.3-.3-.5 2.1-2.4-.6-.3 1.4s1 .2 1 .2c.5.1.6.5.6.7l-1.4 5.6c-.1.2-.2.4-.6.3 0 0-.9-.2-.9-.2l-.6 1.5 2.3.6-.5 2.1 1.3.3.5-2.1c.3.1.7.2 1 .3l-.5 2.1 1.3.3.5-2.1c2.2.4 3.8.2 4.5-1.7.6-1.6 0-2.5-1.1-3.1.8-.2 1.4-.7 1.6-1.8zm-3 3.9c-.4 1.6-3 0.7-3.9.5l.7-2.8c.9.2 3.6.7 3.2 2.3zm.4-3.9c-.3 1.4-2.5.7-3.2.5l.6-2.5c.8.2 3.1.5 2.6 2z" />
+                        </svg>
+                        <div class="btc-info">
+                            <div class="btc-label" data-i18n="btc_label">Bitcoin Address</div>
+                            <div class="btc-address" id="btcAddr">bc1qt4v9tdactx3q40hsmwegdh7cnj4zgdltckalus</div>
+                        </div>
+                        <button class="copy-btn" id="btcCopy" data-i18n="copy_btn">COPY</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sectionTools" class="tab-pane" style="display:none;">
+                <div class="tool-nav">
+                    <button class="tool-tab active" data-tool="entropy">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                        </svg>
+                        <span data-i18n="t_entropy">Entropy & PE</span>
+                    </button>
+                    <button class="tool-tab" data-tool="shellcode">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="4 17 10 11 4 5"></polyline>
+                            <line x1="12" y1="19" x2="20" y2="19"></line>
+                        </svg>
+                        <span data-i18n="t_shellcode">Shellcode & Hex</span>
+                    </button>
+                    <button class="tool-tab" data-tool="hashes">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <span data-i18n="t_hashes">Hashes & NTLM</span>
+                    </button>
+                    <button class="tool-tab" data-tool="xor">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"></path>
+                            <path d="m18 2 4 4-4 4"></path>
+                            <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"></path>
+                            <path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"></path>
+                            <path d="m18 14 4 4-4 4"></path>
+                        </svg>
+                        <span data-i18n="t_xor">XOR</span>
+                    </button>
+                    <button class="tool-tab" data-tool="jwt">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <span data-i18n="t_jwt">Hash & JWT ID</span>
+                    </button>
+                    <button class="tool-tab" data-tool="passgen">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+                        </svg>
+                        <span data-i18n="t_passgen">Pass Gen</span>
+                    </button>
+                    <button class="tool-tab" data-tool="crackme">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="m18 15-6-6-6 6" />
+                            <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                        </svg>
+                        <span data-i18n="t_crackme">RE Crackme</span>
+                    </button>
+                </div>
+
+                <div class="tool-panel glass-panel" id="toolEntropy">
+                    <div class="section-title" data-i18n="t_entropy">Entropy & PE Analysis</div>
+                    <div class="file-dropzone" id="entropyDropzone">
+                        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor"
+                            stroke-width="2" style="color:var(--accent);">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <div style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#fff;"
+                            data-i18n="drop_file">DRAG & DROP ANY FILE (PE / DLL / RAW)</div>
+                        <div style="font-size:11px; color:var(--text-muted);">or click to browse local filesystem</div>
+                        <input type="file" id="entropyFileInput" style="display:none;">
+                    </div>
+                    <div>
+                        <textarea id="entropyTextInput" class="cyber-textarea" rows="3"
+                            placeholder="...or paste raw bytes, hex stream (e.g. 4D 5A 90 00), or text payload here"></textarea>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-val" id="entropyScoreVal">0.000</div>
+                            <div class="stat-label" data-i18n="calc_entropy">SHANNON ENTROPY (0 - 8.0)</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-val" id="entropyBytesVal">0 B</div>
+                            <div class="stat-label" data-i18n="bytes_analyzed">PAYLOAD SIZE</div>
+                        </div>
+                    </div>
+                    <div class="entropy-gauge-wrap">
+                        <span
+                            style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);">0.0</span>
+                        <div class="entropy-bar-bg">
+                            <div class="entropy-bar-fill" id="entropyBarFill"></div>
+                        </div>
+                        <span
+                            style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);">8.0</span>
+                    </div>
+                    <div
+                        style="background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; display:flex; flex-direction:column; gap:8px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <span
+                                style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);"
+                                data-i18n="magic_header">MAGIC SIGNATURE:</span>
+                            <span id="entropyMagicVal"
+                                style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#fff; font-weight:600;">None</span>
+                        </div>
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <span
+                                style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);"
+                                data-i18n="entropy_verdict">VERDICT:</span>
+                            <span id="entropyVerdictVal"
+                                style="font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-secondary); font-weight:600;">Awaiting
+                                Input</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div
+                            style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-secondary); margin-bottom: 6px; display:flex; justify-content:space-between;">
+                            <span>BYTE DISTRIBUTION HISTOGRAM (0x00 - 0xFF)</span>
+                            <span id="entropyPeakVal" style="color:var(--accent);">PEAK: -</span>
+                        </div>
+                        <canvas id="entropyCanvas" width="700" height="90"></canvas>
+                    </div>
+                </div>
+
+                <div class="tool-panel glass-panel" id="toolShellcode" style="display:none;">
+                    <div class="section-title" data-i18n="t_shellcode">Shellcode & Hex Formatter</div>
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div style="display:flex; gap: 8px;">
+                            <button class="cyber-btn active" id="scModeText">ASCII Text</button>
+                            <button class="cyber-btn" id="scModeHex">Hex Input</button>
+                        </div>
+                        <span id="scByteCount"
+                            style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--accent);">0
+                            bytes</span>
+                    </div>
+                    <textarea id="scInput" class="cyber-textarea" rows="4"
+                        placeholder="Enter shellcode or raw data (e.g. \x90\x90\xcc or 4d 5a 90 00)..."></textarea>
+                    <div style="display:flex; gap: 8px; flex-wrap:wrap;">
+                        <button class="cyber-btn active" data-format="hxd">HxD Dump</button>
+                        <button class="cyber-btn" data-format="c">C / C++ Array</button>
+                        <button class="cyber-btn" data-format="csharp">C# Array</button>
+                        <button class="cyber-btn" data-format="python">Python \x Escape</button>
+                        <button class="cyber-btn" data-format="raw">Raw Stream</button>
+                    </div>
+                    <div style="position:relative;">
+                        <pre id="scOutput" class="hex-dump-pre"></pre>
+                        <button class="copy-cyber-btn" id="scCopyBtn" style="position:absolute; top:8px; right:8px;"
+                            data-i18n="copy">COPY</button>
+                    </div>
+                </div>
+
+                <div class="tool-panel glass-panel" id="toolHashes" style="display:none;">
+                    <div class="section-title" data-i18n="t_hashes">Cryptographic Hashes & Windows NTLM</div>
+                    <textarea id="hashInput" class="cyber-textarea" rows="3"
+                        placeholder="Enter plaintext, password, or payload string to hash in real-time..."></textarea>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div class="hash-row">
+                            <span class="hash-tag">NTLM</span>
+                            <span class="hash-val" id="hashNtlm">-</span>
+                            <button class="copy-cyber-btn copy-hash-btn" data-target="hashNtlm"
+                                data-i18n="copy">COPY</button>
+                        </div>
+                        <div class="hash-row">
+                            <span class="hash-tag">MD5</span>
+                            <span class="hash-val" id="hashMd5">-</span>
+                            <button class="copy-cyber-btn copy-hash-btn" data-target="hashMd5"
+                                data-i18n="copy">COPY</button>
+                        </div>
+                        <div class="hash-row">
+                            <span class="hash-tag">SHA-1</span>
+                            <span class="hash-val" id="hashSha1">-</span>
+                            <button class="copy-cyber-btn copy-hash-btn" data-target="hashSha1"
+                                data-i18n="copy">COPY</button>
+                        </div>
+                        <div class="hash-row">
+                            <span class="hash-tag">SHA-256</span>
+                            <span class="hash-val" id="hashSha256">-</span>
+                            <button class="copy-cyber-btn copy-hash-btn" data-target="hashSha256"
+                                data-i18n="copy">COPY</button>
+                        </div>
+                        <div class="hash-row">
+                            <span class="hash-tag">SHA-512</span>
+                            <span class="hash-val" id="hashSha512">-</span>
+                            <button class="copy-cyber-btn copy-hash-btn" data-target="hashSha512"
+                                data-i18n="copy">COPY</button>
+                        </div>
+                        <div class="hash-row">
+                            <span class="hash-tag">CRC32</span>
+                            <span class="hash-val" id="hashCrc32">-</span>
+                            <button class="copy-cyber-btn copy-hash-btn" data-target="hashCrc32"
+                                data-i18n="copy">COPY</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-panel glass-panel" id="toolXor" style="display:none;">
+                    <div class="section-title" data-i18n="t_xor">XOR & Deobfuscator</div>
+                    <textarea id="xorInput" class="cyber-textarea" rows="3"
+                        placeholder="Enter obfuscated payload, shellcode, or text..."></textarea>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input type="text" id="xorKeyInput" class="cyber-input" style="flex:1; min-width:140px;"
+                            placeholder="XOR Key (e.g. 0x5A, SECRET)..." value="0x5A">
+                        <button class="cyber-btn active" id="xorKeyModeHex">Hex Key</button>
+                        <button class="cyber-btn" id="xorKeyModeStr">ASCII Key</button>
+                        <button class="cyber-btn" id="btnDoXor"
+                            style="background:var(--accent); color:#000; font-weight:600;">Apply XOR</button>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="cyber-btn" id="btnB64Enc">Base64 Enc</button>
+                        <button class="cyber-btn" id="btnB64Dec">Base64 Dec</button>
+                        <button class="cyber-btn" id="btnRot13">ROT13</button>
+                        <button class="cyber-btn" id="btnUrlEnc">URL Enc</button>
+                        <button class="cyber-btn" id="btnUrlDec">URL Dec</button>
+                        <button class="cyber-btn" id="btnByteSwap">Swap Endian (4B)</button>
+                        <button class="cyber-btn" id="btnReverse">Reverse</button>
+                    </div>
+                    <div style="position:relative;">
+                        <textarea id="xorOutput" class="cyber-textarea" rows="4" readonly
+                            placeholder="Output will appear here..."></textarea>
+                        <button class="copy-cyber-btn" id="xorCopyBtn" style="position:absolute; top:8px; right:8px;"
+                            data-i18n="copy">COPY</button>
+                    </div>
+                </div>
+
+                <div class="tool-panel glass-panel" id="toolJwt" style="display:none;">
+                    <div class="section-title" data-i18n="t_jwt">Hash Identifier & JWT Token Inspector</div>
+                    <textarea id="idInput" class="cyber-textarea" rows="3"
+                        placeholder="Paste any unknown hash (MD5, SHA, Bcrypt, Argon2...) or JWT (eyJ...)..."></textarea>
+                    <div id="idResultBox"
+                        style="background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:8px; padding:16px; display:flex; flex-direction:column; gap:12px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <span
+                                style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);">CLASSIFICATION:</span>
+                            <span id="idTypeVal"
+                                style="font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--accent); font-weight:600;">Awaiting
+                                Input</span>
+                        </div>
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <span
+                                style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);">SPECIFICATION:</span>
+                            <span id="idDetailVal"
+                                style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#fff;">-</span>
+                        </div>
+                        <div id="jwtDetails"
+                            style="display:none; flex-direction:column; gap:10px; margin-top:8px; border-top:1px solid var(--border); padding-top:12px;">
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                                <span
+                                    style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);">TOKEN
+                                    EXPIRATION:</span>
+                                <span id="jwtExpVal"
+                                    style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#fff;">-</span>
+                            </div>
+                            <div>
+                                <div
+                                    style="font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--accent); margin-bottom:4px;">
+                                    HEADER (DECODED)</div>
+                                <pre id="jwtHeaderPre"
+                                    style="background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#fff; overflow-x:auto;"></pre>
+                            </div>
+                            <div>
+                                <div
+                                    style="font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--accent); margin-bottom:4px;">
+                                    PAYLOAD CLAIMS (DECODED)</div>
+                                <pre id="jwtPayloadPre"
+                                    style="background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#fff; overflow-x:auto;"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-panel glass-panel" id="toolPassgen" style="display:none;">
+                    <div class="section-title" data-i18n="t_passgen">Password Generator</div>
+                    <div style="position:relative;">
+                        <div id="pgOutput"
+                            style="background:rgba(0,0,0,0.6); border:1px solid var(--border); border-radius:8px; padding:16px 50px 16px 16px; font-family:'JetBrains Mono', monospace; font-size:16px; word-break:break-all; min-height:56px; display:flex; align-items:center; user-select:all; color:#fff;">
+                        </div>
+                        <button class="copy-cyber-btn" id="pgCopyBtn" style="position:absolute; top:14px; right:12px;"
+                            data-i18n="copy">COPY</button>
+                    </div>
+                    <div>
+                        <div
+                            style="display:flex; justify-content:space-between; margin-bottom:8px; font-family:'JetBrains Mono', monospace; font-size:11px;">
+                            <span style="color:var(--text-secondary);" data-i18n="pg_length">PASSWORD LENGTH</span>
+                            <span id="pgLengthVal" style="color:var(--accent); font-weight:600;">24</span>
+                        </div>
+                        <input type="range" id="pgLengthSlider" class="cyber-slider" min="8" max="64" value="24">
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="cyber-pill-toggle active" id="pgOptUpper" data-opt="upper">A-Z (Upper)</button>
+                        <button class="cyber-pill-toggle active" id="pgOptLower" data-opt="lower">a-z (Lower)</button>
+                        <button class="cyber-pill-toggle active" id="pgOptNums" data-opt="nums">0-9 (Numbers)</button>
+                        <button class="cyber-pill-toggle active" id="pgOptSyms" data-opt="syms">!@#$ (Symbols)</button>
+                        <button class="cyber-pill-toggle" id="pgOptNoAmb" data-opt="noamb">No Ambiguous
+                            (0,O,1,l)</button>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-val" id="pgEntropyVal">140 bits</div>
+                            <div class="stat-label">ENTROPY RATING</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-val" id="pgStrengthVal" style="color:#7bd88f;">SECURE</div>
+                            <div class="stat-label" data-i18n="pg_strength">STRENGTH</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end;">
+                        <button class="cyber-btn" id="pgGenBtn"
+                            style="background:var(--accent); color:#000; font-weight:600; padding:10px 20px;"
+                            data-i18n="pg_generate">REGENERATE KEY</button>
+                    </div>
+                </div>
+
+                <div class="tool-panel glass-panel" id="toolCrackme" style="display:none;">
+                    <div class="section-title" data-i18n="cm_title">RE Crackme Challenge</div>
+                    <div style="font-size:12px; color:var(--text-secondary);" data-i18n="cm_desc">Reverse engineer the
+                        verification algorithm below to recover the dynamic session unlock key.</div>
+
+                    <div
+                        style="background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:8px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <span
+                                style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);">DYNAMIC
+                                SEED:</span>
+                            <span id="cmSeedVal"
+                                style="font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--accent); font-weight:600; margin-left:6px;">0x4F1A</span>
+                        </div>
+                        <div>
+                            <span
+                                style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);">TARGET
+                                ARCH:</span>
+                            <span
+                                style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#fff; margin-left:6px;">x86-16
+                                PE (Custom VM)</span>
+                        </div>
+                        <div>
+                            <span
+                                style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);">STATUS:</span>
+                            <span id="cmStatusVal"
+                                style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#ff3333; font-weight:600; margin-left:6px;">LOCKED</span>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                        <div>
+                            <div
+                                style="font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--accent); margin-bottom:4px;">
+                                DECOMPILED ROUTINE (PSEUDO-C)</div>
+                            <div class="crackme-code-box" id="cmDecompBox">uint16_t verify(uint16_t seed) {
+                                uint16_t r1 = seed ^ 0x1337;
+                                uint16_t r2 = ((r1 << 4) | (r1>> 12));
+                                    uint16_t key = (r2 + 0x05A0) ^ 0xDEAD;
+                                    return key;
+                                    }</div>
+                        </div>
+                        <div>
+                            <div
+                                style="font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--accent); margin-bottom:4px;">
+                                DISASSEMBLY (x86 ASM)</div>
+                            <div class="crackme-code-box">00401000 MOV AX, [SEED]
+                                00401004 XOR AX, 0x1337
+                                00401008 ROL AX, 4
+                                0040100B ADD AX, 0x05A0
+                                0040100F XOR AX, 0xDEAD
+                                00401013 CMP AX, [KEY]</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input type="text" id="cmKeyInput" class="cyber-input" style="flex:1; min-width:180px;"
+                            placeholder="Enter cracked key (e.g. 0xA4F2 or 42226)...">
+                        <button class="cyber-btn" id="cmVerifyBtn"
+                            style="background:var(--accent); color:#000; font-weight:600;" data-i18n="cm_submit">VERIFY
+                            KEY</button>
+                        <button class="cyber-btn" id="cmTraceBtn">Step Trace</button>
+                        <button class="cyber-btn" id="cmNewBtn" data-i18n="cm_new">New Seed</button>
+                    </div>
+
+                    <div>
+                        <div
+                            style="font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--text-muted); margin-bottom:4px;">
+                            DEBUGGER CONSOLE & REGISTER STACK</div>
+                        <div class="crackme-console" id="cmConsole">[DEBUGGER] Attached to process. Target function
+                            crackme_verify loaded at 0x00401000.
+                            [DEBUGGER] Awaiting key verification...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -808,42 +1652,14 @@
     <script>
         const splash = document.getElementById('splash');
         const lockScene = document.getElementById('lockScene');
-        const splashText = document.getElementById('splashText');
-        const splashTerm = document.getElementById('splashTerm');
-
-        const loadingProjects = [
-            "Loading module: PatchGuard Patcher...",
-            "Loading module: Vanguard Emulator...",
-            "Loading module: Custom Antivirus...",
-            "Loading module: Lua Obfuscator...",
-            "Loading module: Stealer Framework...",
-            "Loading module: Evasion Engine...",
-            "Loading module: HWID Spoofer...",
-            "Loading module: Private Cheat Reversal..."
-        ];
-
-        let termInterval;
 
         setTimeout(() => {
-            splashText.innerText = "AUTHENTICATING";
             lockScene.classList.add('inserting');
 
-            let i = 0;
-            termInterval = setInterval(() => {
-                if (i < loadingProjects.length) {
-                    splashTerm.innerText = loadingProjects[i];
-                    i++;
-                }
-            }, 80);
-
             setTimeout(() => {
-                splashText.innerText = "DECRYPTING_PAYLOAD";
                 lockScene.classList.replace('inserting', 'turning');
 
                 setTimeout(() => {
-                    clearInterval(termInterval);
-                    splashTerm.innerText = "";
-                    splashText.innerText = "ACCESS_GRANTED";
                     lockScene.classList.replace('turning', 'opening');
 
                     setTimeout(() => {
@@ -986,12 +1802,37 @@
                 exp_uefi_desc: "Development of custom UEFI boot modules, driver mapping techniques, and manipulation of Windows kernel defenses (Patchguard/DSE).",
                 exp_fud_title: "Evasion & FUD",
                 exp_fud_desc: "Implementation of advanced evasion methodologies to bypass dynamic/static analysis, ensuring payloads remain Fully Undetectable (FUD).",
+                exp_malware_title: "Malware Analysis & RE",
+                exp_malware_desc: "Expert in detecting complex malware, decompiling binaries, and deobfuscating heavily protected payloads.",
                 title_tools: "Offensive Tooling",
                 title_creative: "Creative Software / Engine",
                 title_support: "Support",
                 btc_label: "Bitcoin Address",
                 copy_btn: "COPY",
-                copied_btn: "COPIED"
+                copied_btn: "COPIED",
+                nav_overview: "OVERVIEW",
+                nav_tools: "WEB TOOLS",
+                t_entropy: "Entropy & PE",
+                t_shellcode: "Shellcode & Hex",
+                t_hashes: "Hashes & NTLM",
+                t_xor: "XOR",
+                t_jwt: "Hash & JWT ID",
+                t_passgen: "Pass Gen",
+                t_crackme: "RE Crackme",
+                pg_length: "PASSWORD LENGTH",
+                pg_strength: "STRENGTH",
+                pg_generate: "REGENERATE KEY",
+                cm_title: "RE Crackme Challenge",
+                cm_desc: "Reverse engineer the verification algorithm below to recover the dynamic session unlock key.",
+                cm_submit: "VERIFY KEY",
+                cm_new: "New Seed",
+                drop_file: "DRAG & DROP ANY FILE (PE / DLL / RAW)",
+                calc_entropy: "SHANNON ENTROPY (0 - 8.0)",
+                bytes_analyzed: "PAYLOAD SIZE",
+                magic_header: "MAGIC SIGNATURE:",
+                entropy_verdict: "VERDICT:",
+                copy: "COPY",
+                copied: "COPIED"
             },
             tr: {
                 stat_years: "Yıl Deneyim",
@@ -1003,12 +1844,37 @@
                 exp_uefi_desc: "Özel UEFI boot modüllerinin geliştirilmesi, sürücü haritalama ve Windows çekirdek savunmalarının (Patchguard/DSE) manipülasyonu.",
                 exp_fud_title: "Evasion & FUD",
                 exp_fud_desc: "Dinamik/statik analizleri atlatmak ve payload'ların Tamamen Tespit Edilemez (FUD) kalmasını sağlamak için gelişmiş yöntemler.",
+                exp_malware_title: "Malware Analizi & RE",
+                exp_malware_desc: "Karmaşık virüsleri tespit etme, dosyaları decompile etme ve ağır şekilde korunan (obfuscated) kodları çözme konusunda uzman.",
                 title_tools: "Offensive Araçlar",
                 title_creative: "Kreatif Yazılım / Motor",
                 title_support: "Destek",
                 btc_label: "Bitcoin Adresi",
                 copy_btn: "KOPYALA",
-                copied_btn: "KOPYALANDI"
+                copied_btn: "KOPYALANDI",
+                nav_overview: "GENEL BAKIŞ",
+                nav_tools: "WEB ARAÇLARI",
+                t_entropy: "Entropi & PE",
+                t_shellcode: "Shellcode & Hex",
+                t_hashes: "Hash & NTLM",
+                t_xor: "XOR",
+                t_jwt: "Hash & JWT Tespiti",
+                t_passgen: "Şifre Oluşturucu",
+                t_crackme: "RE Crackme",
+                pg_length: "ŞİFRE UZUNLUĞU",
+                pg_strength: "GÜVENLİK DÜZEYİ",
+                pg_generate: "ŞİFRE ÜRET",
+                cm_title: "RE Crackme Görevi",
+                cm_desc: "Aşağıdaki doğrulama algoritmasını tersine mühendislikle çözerek dinamik oturum anahtarını bul.",
+                cm_submit: "ANAHTARI DOĞRULA",
+                cm_new: "Yeni Seed",
+                drop_file: "DOSYA SÜRÜKLE (PE / DLL / RAW)",
+                calc_entropy: "SHANNON ENTROPİSİ (0 - 8.0)",
+                bytes_analyzed: "PAYLOAD BOYUTU",
+                magic_header: "MAGIC İMZASI:",
+                entropy_verdict: "DEĞERLENDİRME:",
+                copy: "KOPYALA",
+                copied: "KOPYALANDI"
             },
             de: {
                 stat_years: "Jahre Erf.",
@@ -1020,12 +1886,37 @@
                 exp_uefi_desc: "Entwicklung von benutzerdefinierten UEFI-Boot-Modulen, Treiber-Mapping und Manipulation von Windows-Kernel-Verteidigungen.",
                 exp_fud_title: "Evasion & FUD",
                 exp_fud_desc: "Implementierung fortschrittlicher Umgehungsmethoden zur Umgehung dynamischer/statischer Analysen (FUD).",
+                exp_malware_title: "Malware-Analyse & RE",
+                exp_malware_desc: "Experte für die Erkennung komplexer Malware, das Dekompilieren von Binärdateien und die Deobfuskation geschützter Payloads.",
                 title_tools: "Offensive Werkzeuge",
                 title_creative: "Kreative Software / Engine",
                 title_support: "Unterstützen",
                 btc_label: "Bitcoin-Adresse",
                 copy_btn: "KOPIEREN",
-                copied_btn: "KOPIERT"
+                copied_btn: "KOPIERT",
+                nav_overview: "ÜBERSICHT",
+                nav_tools: "WEB-TOOLS",
+                t_entropy: "Entropie & PE",
+                t_shellcode: "Shellcode & Hex",
+                t_hashes: "Hashes & NTLM",
+                t_xor: "XOR",
+                t_jwt: "Hash & JWT Erkennung",
+                t_passgen: "Passwort-Gen",
+                t_crackme: "RE Crackme",
+                pg_length: "PASSWORTLÄNGE",
+                pg_strength: "STÄRKE",
+                pg_generate: "NEU GENERIEREN",
+                cm_title: "RE Crackme Herausforderung",
+                cm_desc: "Analysieren Sie den Verifizierungsalgorithmus im Reverse-Engineering-Verfahren, um den dynamischen Schlüssel zu finden.",
+                cm_submit: "SCHLÜSSEL PRÜFEN",
+                cm_new: "Neuer Seed",
+                drop_file: "DATEI ABLEGEN (PE / DLL / RAW)",
+                calc_entropy: "SHANNON-ENTROPIE (0 - 8.0)",
+                bytes_analyzed: "NUTZLAST-GRÖSSE",
+                magic_header: "MAGIC-SIGNATUR:",
+                entropy_verdict: "BEWERTUNG:",
+                copy: "KOPIEREN",
+                copied: "KOPIERT"
             },
             ru: {
                 stat_years: "Лет опыта",
@@ -1037,12 +1928,37 @@
                 exp_uefi_desc: "Разработка пользовательских загрузочных модулей UEFI, методов маппинга драйверов и манипулирования защитой ядра Windows.",
                 exp_fud_title: "Evasion & FUD",
                 exp_fud_desc: "Внедрение передовых методологий уклонения для обхода динамического/статического анализа (FUD).",
+                exp_malware_title: "Анализ ВПО & RE",
+                exp_malware_desc: "Эксперт по обнаружению сложных вирусов, декомпиляции файлов и деобфускации сильно защищенного кода.",
                 title_tools: "Наступательные инструменты",
                 title_creative: "ПО и Движки",
                 title_support: "Поддержка",
                 btc_label: "Биткоин-адрес",
                 copy_btn: "КОПИРОВАТЬ",
-                copied_btn: "СКОПИРОВАНО"
+                copied_btn: "СКОПИРОВАНО",
+                nav_overview: "ОБЗОР",
+                nav_tools: "ВЕБ-ИНСТРУМЕНТЫ",
+                t_entropy: "Энтропия & PE",
+                t_shellcode: "Шелл-код & Hex",
+                t_hashes: "Хеши & NTLM",
+                t_xor: "XOR",
+                t_jwt: "Хеш & JWT ID",
+                t_passgen: "Генератор паролей",
+                t_crackme: "RE Crackme",
+                pg_length: "ДЛИНА ПАРОЛЯ",
+                pg_strength: "НАДЕЖНОСТЬ",
+                pg_generate: "СГЕНЕРИРОВАТЬ",
+                cm_title: "RE Crackme Челлендж",
+                cm_desc: "Исследуйте алгоритм проверки с помощью реверс-инжиниринга, чтобы найти динамический ключ сессии.",
+                cm_submit: "ПРОВЕРИТЬ КЛЮЧ",
+                cm_new: "Новый Seed",
+                drop_file: "ПЕРЕТАЩИТЕ ФАЙЛ (PE / DLL / RAW)",
+                calc_entropy: "ЭНТРОПИЯ ШЕННОНА (0 - 8.0)",
+                bytes_analyzed: "РАЗМЕР ДАННЫХ",
+                magic_header: "MAGIC-СИГНАТУРА:",
+                entropy_verdict: "ВЕРДИКТ:",
+                copy: "КОПИРОВАТЬ",
+                copied: "СКОПИРОВАНО"
             },
             zh: {
                 stat_years: "年经验",
@@ -1054,12 +1970,37 @@
                 exp_uefi_desc: "开发自定义UEFI引导模块、驱动程序映射技术以及操作Windows内核防御 (Patchguard/DSE)。",
                 exp_fud_title: "规避与FUD",
                 exp_fud_desc: "实施高级规避方法以绕过动态/静态分析，确保有效载荷保持完全不可检测 (FUD)。",
+                exp_malware_title: "恶意软件分析与逆向",
+                exp_malware_desc: "精通复杂恶意软件检测、二进制文件反编译以及高度保护代码的去混淆。",
                 title_tools: "进攻性工具",
                 title_creative: "创意软件/引擎",
                 title_support: "支持",
                 btc_label: "比特币地址",
                 copy_btn: "复制",
-                copied_btn: "已复制"
+                copied_btn: "已复制",
+                nav_overview: "概览",
+                nav_tools: "网络工具",
+                t_entropy: "熵与PE分析",
+                t_shellcode: "Shellcode与Hex",
+                t_hashes: "哈希与NTLM",
+                t_xor: "XOR",
+                t_jwt: "哈希与JWT识别",
+                t_passgen: "密码生成器",
+                t_crackme: "RE 破解挑战",
+                pg_length: "密码长度",
+                pg_strength: "强度",
+                pg_generate: "重新生成",
+                cm_title: "逆向工程 Crackme 挑战",
+                cm_desc: "对下方的验证算法进行逆向分析，找出会话对应的动态解锁密钥。",
+                cm_submit: "验证密钥",
+                cm_new: "新种子",
+                drop_file: "拖放任何文件 (PE / DLL / RAW)",
+                calc_entropy: "香农熵 (0 - 8.0)",
+                bytes_analyzed: "载荷大小",
+                magic_header: "MAGIC头特征:",
+                entropy_verdict: "分析判定:",
+                copy: "复制",
+                copied: "已复制"
             },
             he: {
                 stat_years: "שנות ניסיון",
@@ -1071,43 +2012,90 @@
                 exp_uefi_desc: "פיתוח מודולי אתחול UEFI, טכניקות מיפוי מנהלי התקנים ומניפולציה של הגנות ליבת Windows.",
                 exp_fud_title: "התחמקות ו-FUD",
                 exp_fud_desc: "יישום מתודולוגיות התחמקות מתקדמות לעקיפת ניתוח דינמי/סטטי (FUD).",
+                exp_malware_title: "ניתוח נוזקות ו-RE",
+                exp_malware_desc: "מומחה באיתור נוזקות מורכבות, דיקומפילציה של קבצים ודה-אובפוסקציה של קוד מוגן.",
                 title_tools: "כלים התקפיים",
                 title_creative: "תוכנה ומנועים",
                 title_support: "תמיכה",
                 btc_label: "כתובת ביטקוין",
                 copy_btn: "העתק",
-                copied_btn: "הועתק"
+                copied_btn: "הועתק",
+                nav_overview: "סקירה",
+                nav_tools: "כלי רשת",
+                t_entropy: "אנטרופיה ו-PE",
+                t_shellcode: "Shellcode ו-Hex",
+                t_hashes: "גיבובים ו-NTLM",
+                t_xor: "XOR",
+                t_jwt: "זיהוי גיבובים ו-JWT",
+                t_passgen: "מחולל סיסמאות",
+                t_crackme: "RE Crackme",
+                pg_length: "אורך סיסמה",
+                pg_strength: "חוזק",
+                pg_generate: "צור מחדש",
+                cm_title: "אתגר RE Crackme",
+                cm_desc: "בצע הנדסה הפוכה לאלגוריתם האימות שלהלן כדי לחשוף את מפתח הנעילה הדינמי.",
+                cm_submit: "אמת מפתח",
+                cm_new: "סיד חדש",
+                drop_file: "גרור קובץ כלשהו (PE / DLL / RAW)",
+                calc_entropy: "אנטרופיית שאנון (0 - 8.0)",
+                bytes_analyzed: "גודל נתונים",
+                magic_header: "חתימת MAGIC:",
+                entropy_verdict: "הערכת מצב:",
+                copy: "העתק",
+                copied: "הועתק"
             }
         };
 
         let currentLang = 'en';
 
-        function setLanguage(lang) {
-            currentLang = lang;
+        const langDropdown = document.getElementById('langDropdown');
+        const langCurrent = document.getElementById('langCurrent');
+
+        langDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langDropdown.classList.toggle('open');
+        });
+        document.addEventListener('click', () => {
+            langDropdown.classList.remove('open');
+        });
+
+        function setLanguage(lang, flagCode, text) {
+            if (currentLang === lang && document.documentElement.lang === lang) return;
             const dict = i18n[lang];
             if (!dict) return;
 
-            document.documentElement.lang = lang;
-            document.documentElement.dir = (lang === 'he') ? 'rtl' : 'ltr';
+            const i18nElements = document.querySelectorAll('[data-i18n]');
+            i18nElements.forEach(el => el.classList.add('text-fading'));
 
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (dict[key]) {
-                    if (el.tagName.toLowerCase() === 'div' && key === 'bio') {
-                        el.innerHTML = dict[key];
-                    } else {
-                        el.textContent = dict[key];
+            setTimeout(() => {
+                currentLang = lang;
+                document.documentElement.lang = lang;
+                document.documentElement.dir = (lang === 'he') ? 'rtl' : 'ltr';
+
+                langCurrent.innerHTML = `<img src="https://flagcdn.com/w20/${flagCode}.png" class="flag" alt="${text}"> ${text}`;
+
+                i18nElements.forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (dict[key]) {
+                        if (el.tagName.toLowerCase() === 'div' && key === 'bio') {
+                            el.innerHTML = dict[key];
+                        } else {
+                            el.textContent = dict[key];
+                        }
                     }
-                }
-            });
+                    el.classList.remove('text-fading');
+                });
 
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-            });
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+                });
+            }, 250);
         }
 
         document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => setLanguage(btn.getAttribute('data-lang')));
+            btn.addEventListener('click', (e) => {
+                setLanguage(btn.getAttribute('data-lang'), btn.getAttribute('data-flag'), btn.textContent.trim());
+            });
         });
 
         function fallback(text, cb) {
@@ -1162,6 +2150,1124 @@
             }
         });
 
+        function md5(input) {
+            let bytes;
+            if (typeof input === 'string') {
+                bytes = new TextEncoder().encode(input);
+            } else {
+                bytes = input;
+            }
+            function safeAdd(x, y) {
+                const lsw = (x & 0xffff) + (y & 0xffff);
+                const msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+                return (msw << 16) | (lsw & 0xffff);
+            }
+            function bitRol(num, cnt) {
+                return (num << cnt) | (num >>> (32 - cnt));
+            }
+            function md5cmn(q, a, b, x, s, t) {
+                return safeAdd(bitRol(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b);
+            }
+            function md5ff(a, b, c, d, x, s, t) {
+                return md5cmn((b & c) | (~b & d), a, b, x, s, t);
+            }
+            function md5gg(a, b, c, d, x, s, t) {
+                return md5cmn((b & d) | (c & ~d), a, b, x, s, t);
+            }
+            function md5hh(a, b, c, d, x, s, t) {
+                return md5cmn(b ^ c ^ d, a, b, x, s, t);
+            }
+            function md5ii(a, b, c, d, x, s, t) {
+                return md5cmn(c ^ (b | ~d), a, b, x, s, t);
+            }
+
+            const n = bytes.length;
+            const words = [];
+            for (let i = 0; i < n; i++) {
+                words[i >> 2] |= bytes[i] << ((i % 4) * 8);
+            }
+            words[n >> 2] |= 0x80 << ((n % 4) * 8);
+            words[(((n + 8) >> 6) << 4) + 14] = (n * 8) & 0xffffffff;
+            words[(((n + 8) >> 6) << 4) + 15] = Math.floor((n * 8) / 0x100000000);
+
+            let a = 1732584193;
+            let b = -271733879;
+            let c = -1732584194;
+            let d = 271733878;
+
+            for (let i = 0; i < words.length; i += 16) {
+                const olda = a, oldb = b, oldc = c, oldd = d;
+                const x = words.slice(i, i + 16);
+                for (let j = 0; j < 16; j++) if (x[j] === undefined) x[j] = 0;
+
+                a = md5ff(a, b, c, d, x[0], 7, -680876936);
+                d = md5ff(d, a, b, c, x[1], 12, -389564586);
+                c = md5ff(c, d, a, b, x[2], 17, 606105819);
+                b = md5ff(b, c, d, a, x[3], 22, -1044525330);
+                a = md5ff(a, b, c, d, x[4], 7, -176418897);
+                d = md5ff(d, a, b, c, x[5], 12, 1200080426);
+                c = md5ff(c, d, a, b, x[6], 17, -1473231341);
+                b = md5ff(b, c, d, a, x[7], 22, -45705983);
+                a = md5ff(a, b, c, d, x[8], 7, 1770035416);
+                d = md5ff(d, a, b, c, x[9], 12, -1958414417);
+                c = md5ff(c, d, a, b, x[10], 17, -42063);
+                b = md5ff(b, c, d, a, x[11], 22, -1990404162);
+                a = md5ff(a, b, c, d, x[12], 7, 1804603682);
+                d = md5ff(d, a, b, c, x[13], 12, -40341101);
+                c = md5ff(c, d, a, b, x[14], 17, -1502002290);
+                b = md5ff(b, c, d, a, x[15], 22, 1236535329);
+
+                a = md5gg(a, b, c, d, x[1], 5, -165796510);
+                d = md5gg(d, a, b, c, x[6], 9, -1069501632);
+                c = md5gg(c, d, a, b, x[11], 14, 643717713);
+                b = md5gg(b, c, d, a, x[0], 20, -373897302);
+                a = md5gg(a, b, c, d, x[5], 5, -701558691);
+                d = md5gg(d, a, b, c, x[10], 9, 38016083);
+                c = md5gg(c, d, a, b, x[15], 14, -660478335);
+                b = md5gg(b, c, d, a, x[4], 20, -405537848);
+                a = md5gg(a, b, c, d, x[9], 5, 568446438);
+                d = md5gg(d, a, b, c, x[14], 9, -1019803690);
+                c = md5gg(c, d, a, b, x[3], 14, -187363961);
+                b = md5gg(b, c, d, a, x[8], 20, 1163531501);
+                a = md5gg(a, b, c, d, x[13], 5, -1444681467);
+                d = md5gg(d, a, b, c, x[2], 9, -51403784);
+                c = md5gg(c, d, a, b, x[7], 14, 1735328473);
+                b = md5gg(b, c, d, a, x[12], 20, -1926607734);
+
+                a = md5hh(a, b, c, d, x[5], 4, -378558);
+                d = md5hh(d, a, b, c, x[8], 11, -2022574463);
+                c = md5hh(c, d, a, b, x[11], 16, 1839030562);
+                b = md5hh(b, c, d, a, x[14], 23, -35309556);
+                a = md5hh(a, b, c, d, x[1], 4, -1530992060);
+                d = md5hh(d, a, b, c, x[4], 11, 1272893353);
+                c = md5hh(c, d, a, b, x[7], 16, -155497632);
+                b = md5hh(b, c, d, a, x[10], 23, -1094730640);
+                a = md5hh(a, b, c, d, x[13], 4, 681279174);
+                d = md5hh(d, a, b, c, x[0], 11, -358537222);
+                c = md5hh(c, d, a, b, x[3], 16, -722521979);
+                b = md5hh(b, c, d, a, x[6], 23, 76029189);
+                a = md5hh(a, b, c, d, x[9], 4, -640364487);
+                d = md5hh(d, a, b, c, x[12], 11, -421815835);
+                c = md5hh(c, d, a, b, x[15], 16, 530742520);
+                b = md5hh(b, c, d, a, x[2], 23, -995338651);
+
+                a = md5ii(a, b, c, d, x[0], 6, -198630844);
+                d = md5ii(d, a, b, c, x[7], 10, 1126891415);
+                c = md5ii(c, d, a, b, x[14], 15, -1416354905);
+                b = md5ii(b, c, d, a, x[5], 21, -57434055);
+                a = md5ii(a, b, c, d, x[12], 6, 1700485571);
+                d = md5ii(d, a, b, c, x[3], 10, -1894986606);
+                c = md5ii(c, d, a, b, x[10], 15, -1051523);
+                b = md5ii(b, c, d, a, x[1], 21, -2054922799);
+                a = md5ii(a, b, c, d, x[8], 6, 1873313359);
+                d = md5ii(d, a, b, c, x[15], 10, -30611744);
+                c = md5ii(c, d, a, b, x[6], 15, -1560198380);
+                b = md5ii(b, c, d, a, x[13], 21, 1309151649);
+                a = md5ii(a, b, c, d, x[4], 6, -145523070);
+                d = md5ii(d, a, b, c, x[11], 10, -1120210379);
+                c = md5ii(c, d, a, b, x[2], 15, 718787259);
+                b = md5ii(b, c, d, a, x[9], 21, -343485551);
+
+                a = safeAdd(a, olda);
+                b = safeAdd(b, oldb);
+                c = safeAdd(c, oldc);
+                d = safeAdd(d, oldd);
+            }
+
+            const hex = [];
+            const arr = [a, b, c, d];
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    hex.push(((arr[i] >> (j * 8)) & 0xff).toString(16).padStart(2, '0'));
+                }
+            }
+            return hex.join('');
+        }
+
+        function md4(words, len) {
+            function rol(n, s) { return (n << s) | (n >>> (32 - s)); }
+            function add(x, y) { return (x + y) & 0xffffffff; }
+            function f(x, y, z) { return (x & y) | (~x & z); }
+            function g(x, y, z) { return (x & y) | (x & z) | (y & z); }
+            function h(x, y, z) { return x ^ y ^ z; }
+
+            words[len >> 2] |= 0x80 << ((len % 4) * 8);
+            words[(((len + 8) >> 6) << 4) + 14] = (len * 8) & 0xffffffff;
+            words[(((len + 8) >> 6) << 4) + 15] = Math.floor((len * 8) / 0x100000000);
+
+            let a = 1732584193, b = -271733879, c = -1732584194, d = 271733878;
+            for (let i = 0; i < words.length; i += 16) {
+                const X = words.slice(i, i + 16);
+                for (let j = 0; j < 16; j++) if (X[j] === undefined) X[j] = 0;
+                const aa = a, bb = b, cc = c, dd = d;
+
+                const r1 = [3, 7, 11, 19];
+                for (let j = 0; j < 16; j++) {
+                    const step = [
+                        () => a = rol(add(add(a, f(b, c, d)), X[j]), r1[j % 4]),
+                        () => d = rol(add(add(d, f(a, b, c)), X[j]), r1[j % 4]),
+                        () => c = rol(add(add(c, f(d, a, b)), X[j]), r1[j % 4]),
+                        () => b = rol(add(add(b, f(c, d, a)), X[j]), r1[j % 4])
+                    ];
+                    step[j % 4]();
+                }
+
+                const r2 = [3, 5, 9, 13];
+                const ord2 = [0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15];
+                for (let j = 0; j < 16; j++) {
+                    const k = ord2[j];
+                    const C = 0x5a827999;
+                    const step = [
+                        () => a = rol(add(add(add(a, g(b, c, d)), X[k]), C), r2[j % 4]),
+                        () => d = rol(add(add(add(d, g(a, b, c)), X[k]), C), r2[j % 4]),
+                        () => c = rol(add(add(add(c, g(d, a, b)), X[k]), C), r2[j % 4]),
+                        () => b = rol(add(add(add(b, g(c, d, a)), X[k]), C), r2[j % 4])
+                    ];
+                    step[j % 4]();
+                }
+
+                const r3 = [3, 9, 11, 15];
+                const ord3 = [0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15];
+                for (let j = 0; j < 16; j++) {
+                    const k = ord3[j];
+                    const C = 0x6ed9eba1;
+                    const step = [
+                        () => a = rol(add(add(add(a, h(b, c, d)), X[k]), C), r3[j % 4]),
+                        () => d = rol(add(add(add(d, h(a, b, c)), X[k]), C), r3[j % 4]),
+                        () => c = rol(add(add(add(c, h(d, a, b)), X[k]), C), r3[j % 4]),
+                        () => b = rol(add(add(add(b, h(c, d, a)), X[k]), C), r3[j % 4])
+                    ];
+                    step[j % 4]();
+                }
+
+                a = add(a, aa); b = add(b, bb); c = add(c, cc); d = add(d, dd);
+            }
+            const hex = [];
+            const arr = [a, b, c, d];
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    hex.push(((arr[i] >> (j * 8)) & 0xff).toString(16).padStart(2, '0'));
+                }
+            }
+            return hex.join('');
+        }
+
+        function ntlm(str) {
+            const words = [];
+            const len = str.length * 2;
+            for (let i = 0; i < str.length; i++) {
+                const code = str.charCodeAt(i);
+                const idx = i * 2;
+                words[idx >> 2] |= (code & 0xff) << ((idx % 4) * 8);
+                words[(idx + 1) >> 2] |= ((code >> 8) & 0xff) << (((idx + 1) % 4) * 8);
+            }
+            return md4(words, len);
+        }
+
+        const crcTable = (function () {
+            let c;
+            const table = [];
+            for (let n = 0; n < 256; n++) {
+                c = n;
+                for (let k = 0; k < 8; k++) {
+                    c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
+                }
+                table[n] = c;
+            }
+            return table;
+        })();
+
+        function crc32(bytes) {
+            if (typeof bytes === 'string') bytes = new TextEncoder().encode(bytes);
+            let crc = 0 ^ (-1);
+            for (let i = 0; i < bytes.length; i++) {
+                crc = (crc >>> 8) ^ crcTable[(crc ^ bytes[i]) & 0xFF];
+            }
+            return ((crc ^ (-1)) >>> 0).toString(16).padStart(8, '0');
+        }
+
+        const tabBtnOverview = document.getElementById('tabBtnOverview');
+        const tabBtnTools = document.getElementById('tabBtnTools');
+        const sectionOverview = document.getElementById('sectionOverview');
+        const sectionTools = document.getElementById('sectionTools');
+
+        function switchMainTab(target) {
+            if (target === 'overview') {
+                if (tabBtnOverview.classList.contains('active')) return;
+                tabBtnOverview.classList.add('active');
+                tabBtnTools.classList.remove('active');
+                sectionTools.classList.add('pane-fading');
+                setTimeout(() => {
+                    sectionTools.style.display = 'none';
+                    sectionOverview.style.display = 'flex';
+                    sectionOverview.classList.add('pane-fading');
+                    setTimeout(() => {
+                        sectionOverview.classList.remove('pane-fading');
+                    }, 50);
+                }, 200);
+            } else {
+                if (tabBtnTools.classList.contains('active')) return;
+                tabBtnTools.classList.add('active');
+                tabBtnOverview.classList.remove('active');
+                sectionOverview.classList.add('pane-fading');
+                setTimeout(() => {
+                    sectionOverview.style.display = 'none';
+                    sectionTools.style.display = 'flex';
+                    sectionTools.classList.add('pane-fading');
+                    setTimeout(() => {
+                        sectionTools.classList.remove('pane-fading');
+                        updateEntropyCanvas();
+                    }, 50);
+                }, 200);
+            }
+        }
+
+        tabBtnOverview.addEventListener('click', () => switchMainTab('overview'));
+        tabBtnTools.addEventListener('click', () => switchMainTab('tools'));
+
+        const toolTabs = document.querySelectorAll('.tool-tab');
+        const toolPanels = {
+            entropy: document.getElementById('toolEntropy'),
+            shellcode: document.getElementById('toolShellcode'),
+            hashes: document.getElementById('toolHashes'),
+            xor: document.getElementById('toolXor'),
+            jwt: document.getElementById('toolJwt'),
+            passgen: document.getElementById('toolPassgen'),
+            crackme: document.getElementById('toolCrackme')
+        };
+
+        toolTabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tool = btn.getAttribute('data-tool');
+                toolTabs.forEach(t => t.classList.toggle('active', t === btn));
+                Object.keys(toolPanels).forEach(key => {
+                    toolPanels[key].style.display = (key === tool) ? 'flex' : 'none';
+                });
+                if (tool === 'entropy') updateEntropyCanvas();
+            });
+        });
+
+        let cachedFreq = new Uint32Array(256);
+        let cachedMaxFreq = 0;
+        let cachedEnt = 0;
+
+        function updateEntropyCanvas() {
+            const canvas = document.getElementById('entropyCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const cw = canvas.width;
+            const ch = canvas.height;
+            ctx.clearRect(0, 0, cw, ch);
+            if (!cachedMaxFreq) return;
+            const barW = cw / 256;
+            for (let i = 0; i < 256; i++) {
+                if (cachedFreq[i] > 0) {
+                    const barH = (cachedFreq[i] / cachedMaxFreq) * (ch - 6);
+                    const x = i * barW;
+                    const y = ch - barH;
+                    ctx.fillStyle = cachedEnt > 7.2 ? '#ff3333' : cachedEnt > 6.0 ? '#f7931a' : '#7bd88f';
+                    ctx.fillRect(x, y, Math.max(1, barW - 0.4), barH);
+                }
+            }
+        }
+
+        function analyzeEntropy(uint8) {
+            const len = uint8.length;
+            if (len === 0) {
+                cachedFreq = new Uint32Array(256);
+                cachedMaxFreq = 0;
+                cachedEnt = 0;
+                document.getElementById('entropyScoreVal').textContent = '0.000';
+                document.getElementById('entropyBytesVal').textContent = '0 B';
+                document.getElementById('entropyBarFill').style.width = '0%';
+                document.getElementById('entropyMagicVal').textContent = 'None';
+                document.getElementById('entropyVerdictVal').textContent = 'Awaiting Input';
+                document.getElementById('entropyVerdictVal').style.color = 'var(--text-secondary)';
+                document.getElementById('entropyPeakVal').textContent = 'PEAK: -';
+                updateEntropyCanvas();
+                return;
+            }
+
+            cachedFreq = new Uint32Array(256);
+            let maxFreq = 0;
+            let peakByte = 0;
+            for (let i = 0; i < len; i++) {
+                const b = uint8[i];
+                cachedFreq[b]++;
+                if (cachedFreq[b] > maxFreq) {
+                    maxFreq = cachedFreq[b];
+                    peakByte = b;
+                }
+            }
+            cachedMaxFreq = maxFreq;
+
+            let ent = 0;
+            for (let i = 0; i < 256; i++) {
+                if (cachedFreq[i] > 0) {
+                    const p = cachedFreq[i] / len;
+                    ent -= p * Math.log2(p);
+                }
+            }
+            cachedEnt = ent;
+
+            document.getElementById('entropyScoreVal').textContent = ent.toFixed(3);
+            document.getElementById('entropyBytesVal').textContent = len > 1048576 ? (len / 1048576).toFixed(2) + ' MB' : len > 1024 ? (len / 1024).toFixed(1) + ' KB' : len + ' B';
+            const percent = Math.min(100, Math.max(0, (ent / 8.0) * 100));
+            document.getElementById('entropyBarFill').style.width = percent + '%';
+
+            let verdict = '';
+            let verdictColor = '#999';
+            if (ent < 3.0) {
+                verdict = 'Very Low (Sparse / Repetitive Data)';
+                verdictColor = '#7bd88f';
+            } else if (ent < 5.8) {
+                verdict = 'Normal / Low (Plaintext / Source Code)';
+                verdictColor = '#7bd88f';
+            } else if (ent < 6.8) {
+                verdict = 'Moderate (Native Executable / Assembly)';
+                verdictColor = '#f7931a';
+            } else if (ent < 7.3) {
+                verdict = 'High (Compressed Sections / Obfuscated)';
+                verdictColor = '#ff6633';
+            } else {
+                verdict = 'CRITICAL: Packed / Cryptered / FUD Payload';
+                verdictColor = '#ff3333';
+            }
+            const verdictEl = document.getElementById('entropyVerdictVal');
+            verdictEl.textContent = verdict;
+            verdictEl.style.color = verdictColor;
+
+            let magic = 'Raw Stream / Unknown';
+            if (len >= 2 && uint8[0] === 0x4D && uint8[1] === 0x5A) magic = 'PE32 / Windows Executable (MZ)';
+            else if (len >= 4 && uint8[0] === 0x7F && uint8[1] === 0x45 && uint8[2] === 0x4C && uint8[3] === 0x46) magic = 'ELF / Linux Executable';
+            else if (len >= 4 && uint8[0] === 0x50 && uint8[1] === 0x4B && uint8[2] === 0x03 && uint8[3] === 0x04) magic = 'ZIP / JAR / Office Archive';
+            else if (len >= 4 && uint8[0] === 0xCA && uint8[1] === 0xFE && uint8[2] === 0xBA && uint8[3] === 0xBE) magic = 'Mach-O / Java Class';
+            else if (len >= 4 && uint8[0] === 0x89 && uint8[1] === 0x50 && uint8[2] === 0x4E && uint8[3] === 0x47) magic = 'PNG Image';
+            else if (len >= 3 && uint8[0] === 0xFF && uint8[1] === 0xD8 && uint8[2] === 0xFF) magic = 'JPEG Image';
+            else if (len >= 4 && uint8[0] === 0x25 && uint8[1] === 0x50 && uint8[2] === 0x44 && uint8[3] === 0x46) magic = 'PDF Document';
+            else if (len >= 6 && uint8[0] === 0x37 && uint8[1] === 0x7A && uint8[2] === 0xBC && uint8[3] === 0xAF && uint8[4] === 0x27 && uint8[5] === 0x1C) magic = '7-Zip Archive';
+
+            document.getElementById('entropyMagicVal').textContent = magic;
+            document.getElementById('entropyPeakVal').textContent = `PEAK: 0x${peakByte.toString(16).padStart(2, '0').toUpperCase()} (${((maxFreq / len) * 100).toFixed(1)}%)`;
+            updateEntropyCanvas();
+        }
+
+        const entropyFileInput = document.getElementById('entropyFileInput');
+        const entropyDropzone = document.getElementById('entropyDropzone');
+        if (entropyDropzone && entropyFileInput) {
+            entropyDropzone.addEventListener('click', () => entropyFileInput.click());
+            entropyDropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                entropyDropzone.classList.add('dragover');
+            });
+            entropyDropzone.addEventListener('dragleave', () => entropyDropzone.classList.remove('dragover'));
+            entropyDropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                entropyDropzone.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleEntropyFile(e.dataTransfer.files[0]);
+                }
+            });
+            entropyFileInput.addEventListener('change', () => {
+                if (entropyFileInput.files && entropyFileInput.files[0]) {
+                    handleEntropyFile(entropyFileInput.files[0]);
+                }
+            });
+        }
+
+        function handleEntropyFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const u8 = new Uint8Array(e.target.result);
+                analyzeEntropy(u8);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        const entropyTextInput = document.getElementById('entropyTextInput');
+        if (entropyTextInput) {
+            entropyTextInput.addEventListener('input', () => {
+                const val = entropyTextInput.value.trim();
+                if (!val) {
+                    analyzeEntropy(new Uint8Array(0));
+                    return;
+                }
+                if (/^(0x|[0-9a-fA-F]{2}[\s,]*)+$/.test(val.replace(/\\x/g, ''))) {
+                    const clean = val.replace(/0x|\\x|[\s,;]/g, '');
+                    const bytes = [];
+                    for (let i = 0; i < clean.length; i += 2) {
+                        const b = parseInt(clean.substr(i, 2), 16);
+                        if (!isNaN(b)) bytes.push(b);
+                    }
+                    analyzeEntropy(new Uint8Array(bytes));
+                } else {
+                    analyzeEntropy(new TextEncoder().encode(val));
+                }
+            });
+        }
+
+        let scMode = 'text';
+        let scFormat = 'hxd';
+        const scInput = document.getElementById('scInput');
+        const scOutput = document.getElementById('scOutput');
+        const scByteCount = document.getElementById('scByteCount');
+        const scModeText = document.getElementById('scModeText');
+        const scModeHex = document.getElementById('scModeHex');
+
+        if (scModeText && scModeHex) {
+            scModeText.addEventListener('click', () => {
+                scMode = 'text';
+                scModeText.classList.add('active');
+                scModeHex.classList.remove('active');
+                updateScOutput();
+            });
+            scModeHex.addEventListener('click', () => {
+                scMode = 'hex';
+                scModeHex.classList.add('active');
+                scModeText.classList.remove('active');
+                updateScOutput();
+            });
+        }
+
+        document.querySelectorAll('#toolShellcode [data-format]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#toolShellcode [data-format]').forEach(b => b.classList.toggle('active', b === btn));
+                scFormat = btn.getAttribute('data-format');
+                updateScOutput();
+            });
+        });
+
+        function parseScBytes() {
+            const val = scInput.value;
+            if (!val) return new Uint8Array(0);
+            if (scMode === 'hex') {
+                const clean = val.replace(/0x|\\x|[\s,;{}|]/g, '');
+                const bytes = [];
+                for (let i = 0; i < clean.length; i += 2) {
+                    const b = parseInt(clean.substr(i, 2), 16);
+                    if (!isNaN(b)) bytes.push(b);
+                }
+                return new Uint8Array(bytes);
+            }
+            return new TextEncoder().encode(val);
+        }
+
+        function updateScOutput() {
+            const u8 = parseScBytes();
+            scByteCount.textContent = `${u8.length} bytes`;
+            if (u8.length === 0) {
+                scOutput.textContent = 'Awaiting payload input...';
+                return;
+            }
+            if (scFormat === 'hxd') {
+                let lines = ['OFFSET    00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F  Decoded Text'];
+                for (let i = 0; i < u8.length; i += 16) {
+                    const chunk = u8.slice(i, i + 16);
+                    const offset = i.toString(16).padStart(8, '0').toUpperCase();
+                    let hexPart1 = [];
+                    let hexPart2 = [];
+                    let asciiPart = '';
+                    for (let j = 0; j < 16; j++) {
+                        if (j < chunk.length) {
+                            const byteStr = chunk[j].toString(16).padStart(2, '0').toUpperCase();
+                            if (j < 8) hexPart1.push(byteStr);
+                            else hexPart2.push(byteStr);
+                            asciiPart += (chunk[j] >= 32 && chunk[j] <= 126) ? String.fromCharCode(chunk[j]) : '.';
+                        } else {
+                            if (j < 8) hexPart1.push('  ');
+                            else hexPart2.push('  ');
+                        }
+                    }
+                    lines.push(`${offset}  ${hexPart1.join(' ')}  ${hexPart2.join(' ')}  |${asciiPart}|`);
+                }
+                scOutput.textContent = lines.join('\n');
+            } else if (scFormat === 'c') {
+                let hexArr = Array.from(u8).map(b => '0x' + b.toString(16).padStart(2, '0'));
+                let lines = [];
+                for (let i = 0; i < hexArr.length; i += 12) {
+                    lines.push('    ' + hexArr.slice(i, i + 12).join(', ') + (i + 12 < hexArr.length ? ',' : ''));
+                }
+                scOutput.textContent = `unsigned char shellcode[${u8.length}] = {\n${lines.join('\n')}\n};`;
+            } else if (scFormat === 'csharp') {
+                let hexArr = Array.from(u8).map(b => '0x' + b.toString(16).padStart(2, '0'));
+                let lines = [];
+                for (let i = 0; i < hexArr.length; i += 12) {
+                    lines.push('    ' + hexArr.slice(i, i + 12).join(', ') + (i + 12 < hexArr.length ? ',' : ''));
+                }
+                scOutput.textContent = `byte[] payload = new byte[${u8.length}] {\n${lines.join('\n')}\n};`;
+            } else if (scFormat === 'python') {
+                let hexStr = Array.from(u8).map(b => '\\x' + b.toString(16).padStart(2, '0')).join('');
+                scOutput.textContent = `shellcode = b"${hexStr}"`;
+            } else if (scFormat === 'raw') {
+                scOutput.textContent = Array.from(u8).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join('');
+            }
+        }
+        if (scInput) scInput.addEventListener('input', updateScOutput);
+        const scCopyBtn = document.getElementById('scCopyBtn');
+        if (scCopyBtn) {
+            scCopyBtn.addEventListener('click', () => {
+                const text = scOutput.textContent;
+                fallback(text, () => {
+                    const dict = i18n[currentLang];
+                    scCopyBtn.textContent = dict.copied || 'COPIED';
+                    scCopyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        scCopyBtn.textContent = dict.copy || 'COPY';
+                        scCopyBtn.classList.remove('copied');
+                    }, 1500);
+                });
+            });
+        }
+
+        function updateHashes() {
+            const val = document.getElementById('hashInput').value;
+            if (!val) {
+                ['hashNtlm', 'hashMd5', 'hashSha1', 'hashSha256', 'hashSha512', 'hashCrc32'].forEach(id => {
+                    document.getElementById(id).textContent = '-';
+                });
+                return;
+            }
+            document.getElementById('hashNtlm').textContent = ntlm(val).toUpperCase();
+            document.getElementById('hashMd5').textContent = md5(val);
+            const u8 = new TextEncoder().encode(val);
+            document.getElementById('hashCrc32').textContent = crc32(u8).toUpperCase();
+
+            crypto.subtle.digest('SHA-1', u8).then(buf => {
+                document.getElementById('hashSha1').textContent = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            });
+            crypto.subtle.digest('SHA-256', u8).then(buf => {
+                document.getElementById('hashSha256').textContent = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            });
+            crypto.subtle.digest('SHA-512', u8).then(buf => {
+                document.getElementById('hashSha512').textContent = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            });
+        }
+        const hashInput = document.getElementById('hashInput');
+        if (hashInput) hashInput.addEventListener('input', updateHashes);
+
+        document.querySelectorAll('.copy-hash-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const text = document.getElementById(targetId).textContent;
+                if (text && text !== '-') {
+                    fallback(text, () => {
+                        const dict = i18n[currentLang];
+                        btn.textContent = dict.copied || 'COPIED';
+                        btn.classList.add('copied');
+                        setTimeout(() => {
+                            btn.textContent = dict.copy || 'COPY';
+                            btn.classList.remove('copied');
+                        }, 1500);
+                    });
+                }
+            });
+        });
+
+        let xorKeyMode = 'hex';
+        const xorKeyModeHex = document.getElementById('xorKeyModeHex');
+        const xorKeyModeStr = document.getElementById('xorKeyModeStr');
+        if (xorKeyModeHex && xorKeyModeStr) {
+            xorKeyModeHex.addEventListener('click', () => {
+                xorKeyMode = 'hex';
+                xorKeyModeHex.classList.add('active');
+                xorKeyModeStr.classList.remove('active');
+            });
+            xorKeyModeStr.addEventListener('click', () => {
+                xorKeyMode = 'str';
+                xorKeyModeStr.classList.add('active');
+                xorKeyModeHex.classList.remove('active');
+            });
+        }
+
+        function parseXorKey(keyStr) {
+            if (!keyStr) return new Uint8Array([0x5A]);
+            if (xorKeyMode === 'hex') {
+                const clean = keyStr.replace(/0x|\\x|[\s,;]/g, '');
+                const bytes = [];
+                for (let i = 0; i < clean.length; i += 2) {
+                    const b = parseInt(clean.substr(i, 2), 16);
+                    if (!isNaN(b)) bytes.push(b);
+                }
+                return bytes.length > 0 ? new Uint8Array(bytes) : new Uint8Array([0x5A]);
+            }
+            return new TextEncoder().encode(keyStr);
+        }
+
+        function doXor() {
+            const input = document.getElementById('xorInput').value;
+            const key = parseXorKey(document.getElementById('xorKeyInput').value);
+            let u8;
+            if (/^(0x|[0-9a-fA-F]{2}[\s,]*)+$/.test(input.replace(/\\x/g, ''))) {
+                const clean = input.replace(/0x|\\x|[\s,;]/g, '');
+                const bytes = [];
+                for (let i = 0; i < clean.length; i += 2) {
+                    const b = parseInt(clean.substr(i, 2), 16);
+                    if (!isNaN(b)) bytes.push(b);
+                }
+                u8 = new Uint8Array(bytes);
+            } else {
+                u8 = new TextEncoder().encode(input);
+            }
+            const out = new Uint8Array(u8.length);
+            for (let i = 0; i < u8.length; i++) {
+                out[i] = u8[i] ^ key[i % key.length];
+            }
+            const hex = Array.from(out).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+            let text = '';
+            try { text = new TextDecoder('utf-8', { fatal: false }).decode(out); } catch (e) { }
+            document.getElementById('xorOutput').value = `HEX:\n${hex}\n\nASCII / UTF-8:\n${text}`;
+        }
+        const btnDoXor = document.getElementById('btnDoXor');
+        if (btnDoXor) btnDoXor.addEventListener('click', doXor);
+
+        const xorOutput = document.getElementById('xorOutput');
+        const xorCopyBtn = document.getElementById('xorCopyBtn');
+        if (xorCopyBtn) {
+            xorCopyBtn.addEventListener('click', () => {
+                const text = xorOutput.value;
+                fallback(text, () => {
+                    const dict = i18n[currentLang];
+                    xorCopyBtn.textContent = dict.copied || 'COPIED';
+                    xorCopyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        xorCopyBtn.textContent = dict.copy || 'COPY';
+                        xorCopyBtn.classList.remove('copied');
+                    }, 1500);
+                });
+            });
+        }
+
+        const btnB64Enc = document.getElementById('btnB64Enc');
+        if (btnB64Enc) {
+            btnB64Enc.addEventListener('click', () => {
+                const input = document.getElementById('xorInput').value;
+                try {
+                    xorOutput.value = btoa(unescape(encodeURIComponent(input)));
+                } catch (e) {
+                    xorOutput.value = 'Base64 Encode Error';
+                }
+            });
+        }
+        const btnB64Dec = document.getElementById('btnB64Dec');
+        if (btnB64Dec) {
+            btnB64Dec.addEventListener('click', () => {
+                const input = document.getElementById('xorInput').value.trim();
+                try {
+                    xorOutput.value = decodeURIComponent(escape(atob(input)));
+                } catch (e) {
+                    xorOutput.value = 'Base64 Decode Error';
+                }
+            });
+        }
+        const btnRot13 = document.getElementById('btnRot13');
+        if (btnRot13) {
+            btnRot13.addEventListener('click', () => {
+                const input = document.getElementById('xorInput').value;
+                xorOutput.value = input.replace(/[a-zA-Z]/g, c => {
+                    const base = c <= 'Z' ? 65 : 97;
+                    return String.fromCharCode(base + (c.charCodeAt(0) - base + 13) % 26);
+                });
+            });
+        }
+        const btnUrlEnc = document.getElementById('btnUrlEnc');
+        if (btnUrlEnc) {
+            btnUrlEnc.addEventListener('click', () => {
+                xorOutput.value = encodeURIComponent(document.getElementById('xorInput').value);
+            });
+        }
+        const btnUrlDec = document.getElementById('btnUrlDec');
+        if (btnUrlDec) {
+            btnUrlDec.addEventListener('click', () => {
+                try {
+                    xorOutput.value = decodeURIComponent(document.getElementById('xorInput').value);
+                } catch (e) {
+                    xorOutput.value = 'URL Decode Error';
+                }
+            });
+        }
+        const btnByteSwap = document.getElementById('btnByteSwap');
+        if (btnByteSwap) {
+            btnByteSwap.addEventListener('click', () => {
+                const input = document.getElementById('xorInput').value;
+                const clean = input.replace(/0x|\\x|[\s,;]/g, '');
+                const bytes = [];
+                for (let i = 0; i < clean.length; i += 2) {
+                    const b = parseInt(clean.substr(i, 2), 16);
+                    if (!isNaN(b)) bytes.push(b);
+                }
+                const swapped = [];
+                for (let i = 0; i < bytes.length; i += 4) {
+                    const chunk = bytes.slice(i, i + 4).reverse();
+                    swapped.push(...chunk);
+                }
+                xorOutput.value = swapped.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+            });
+        }
+        const btnReverse = document.getElementById('btnReverse');
+        if (btnReverse) {
+            btnReverse.addEventListener('click', () => {
+                xorOutput.value = document.getElementById('xorInput').value.split('').reverse().join('');
+            });
+        }
+
+        function inspectHashOrJwt() {
+            const val = document.getElementById('idInput').value.trim();
+            const typeEl = document.getElementById('idTypeVal');
+            const detailEl = document.getElementById('idDetailVal');
+            const jwtBox = document.getElementById('jwtDetails');
+            if (!val) {
+                typeEl.textContent = 'Awaiting Input';
+                detailEl.textContent = '-';
+                jwtBox.style.display = 'none';
+                return;
+            }
+
+            if (/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*$/.test(val)) {
+                typeEl.textContent = 'JSON Web Token (JWT)';
+                detailEl.textContent = 'RFC 7519 Compact Serialization';
+                jwtBox.style.display = 'flex';
+                const parts = val.split('.');
+                try {
+                    const b64 = (s) => atob(s.replace(/-/g, '+').replace(/_/g, '/'));
+                    const header = JSON.parse(b64(parts[0]));
+                    const payload = JSON.parse(b64(parts[1]));
+                    document.getElementById('jwtHeaderPre').textContent = JSON.stringify(header, null, 2);
+                    document.getElementById('jwtPayloadPre').textContent = JSON.stringify(payload, null, 2);
+                    if (payload.exp) {
+                        const expDate = new Date(payload.exp * 1000);
+                        const now = new Date();
+                        const diff = (expDate.getTime() - now.getTime()) / 1000;
+                        if (diff < 0) {
+                            document.getElementById('jwtExpVal').innerHTML = `<span style="color:#ff3333">EXPIRED</span> (${expDate.toLocaleString()})`;
+                        } else {
+                            const hours = Math.floor(diff / 3600);
+                            const mins = Math.floor((diff % 3600) / 60);
+                            document.getElementById('jwtExpVal').innerHTML = `<span style="color:#7bd88f">VALID</span> (Expires in ${hours}h ${mins}m — ${expDate.toLocaleString()})`;
+                        }
+                    } else {
+                        document.getElementById('jwtExpVal').textContent = 'No exp claim specified';
+                    }
+                } catch (e) {
+                    document.getElementById('jwtHeaderPre').textContent = 'Error parsing JWT structure';
+                    document.getElementById('jwtPayloadPre').textContent = '-';
+                }
+                return;
+            }
+
+            jwtBox.style.display = 'none';
+            const hexOnly = /^[a-fA-F0-9]+$/.test(val);
+            const len = val.length;
+
+            if (val.startsWith('$2a$') || val.startsWith('$2b$') || val.startsWith('$2y$')) {
+                typeEl.textContent = 'Bcrypt Hash';
+                detailEl.textContent = `Blowfish-based crypt hash (${len} chars, cost=${val.split('$')[2] || 'unknown'})`;
+            } else if (val.startsWith('$argon2')) {
+                typeEl.textContent = 'Argon2 Password Hash';
+                detailEl.textContent = 'Modern memory-hard cryptographic hash (PHC format)';
+            } else if (val.startsWith('$6$')) {
+                typeEl.textContent = 'SHA-512 Unix Crypt';
+                detailEl.textContent = 'Unix shadow password hash (SHA-512 variant)';
+            } else if (val.startsWith('$1$')) {
+                typeEl.textContent = 'MD5 Unix Crypt';
+                detailEl.textContent = 'Unix shadow password hash (MD5 variant)';
+            } else if (hexOnly && len === 32) {
+                typeEl.textContent = 'MD5 / NTLM / MD4';
+                detailEl.textContent = '128-bit hash (32 hex chars) — Standard MD5 or Windows NT/LM password digest';
+            } else if (hexOnly && len === 40) {
+                typeEl.textContent = 'SHA-1 / RIPEMD-160';
+                detailEl.textContent = '160-bit hash (40 hex chars) — Legacy cryptographic digest / Git commit hash';
+            } else if (hexOnly && len === 56) {
+                typeEl.textContent = 'SHA-224 / SHA3-224';
+                detailEl.textContent = '224-bit hash (56 hex chars) — Truncated SHA-2 / Keccak digest';
+            } else if (hexOnly && len === 64) {
+                typeEl.textContent = 'SHA-256 / BLAKE2s / Keccak-256';
+                detailEl.textContent = '256-bit hash (64 hex chars) — Industry standard cryptographic hash';
+            } else if (hexOnly && len === 96) {
+                typeEl.textContent = 'SHA-384';
+                detailEl.textContent = '384-bit hash (96 hex chars) — High-security Suite B hash';
+            } else if (hexOnly && len === 128) {
+                typeEl.textContent = 'SHA-512 / Whirlpool / BLAKE2b';
+                detailEl.textContent = '512-bit hash (128 hex chars) — High-entropy cryptographic digest';
+            } else if (hexOnly && len === 8) {
+                typeEl.textContent = 'CRC32 / Adler-32';
+                detailEl.textContent = '32-bit checksum (8 hex chars)';
+            } else {
+                typeEl.textContent = 'Unrecognized Pattern';
+                detailEl.textContent = `Length: ${len} chars. Neither standard hex hash nor known crypt/JWT format.`;
+            }
+        }
+        const idInput = document.getElementById('idInput');
+        if (idInput) idInput.addEventListener('input', inspectHashOrJwt);
+
+        const pgOpts = { upper: true, lower: true, nums: true, syms: true, noamb: false };
+        const pgLengthSlider = document.getElementById('pgLengthSlider');
+        const pgLengthVal = document.getElementById('pgLengthVal');
+        const pgOutput = document.getElementById('pgOutput');
+        const pgEntropyVal = document.getElementById('pgEntropyVal');
+        const pgStrengthVal = document.getElementById('pgStrengthVal');
+        const pgGenBtn = document.getElementById('pgGenBtn');
+        const pgCopyBtn = document.getElementById('pgCopyBtn');
+
+        const PG_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const PG_LOWER = 'abcdefghijklmnopqrstuvwxyz';
+        const PG_NUMS = '0123456789';
+        const PG_SYMS = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+        function generatePassword() {
+            if (!pgOutput || !pgLengthSlider) return;
+            const len = parseInt(pgLengthSlider.value, 10);
+            if (pgLengthVal) pgLengthVal.textContent = len;
+
+            let uSet = PG_UPPER;
+            let lSet = PG_LOWER;
+            let nSet = PG_NUMS;
+            let sSet = PG_SYMS;
+
+            if (pgOpts.noamb) {
+                uSet = uSet.replace(/[OIl]/g, '');
+                lSet = lSet.replace(/[lIo]/g, '');
+                nSet = nSet.replace(/[01]/g, '');
+                sSet = sSet.replace(/[|]/g, '');
+            }
+
+            let pool = '';
+            const requiredSets = [];
+
+            if (pgOpts.upper) { pool += uSet; requiredSets.push(uSet); }
+            if (pgOpts.lower) { pool += lSet; requiredSets.push(lSet); }
+            if (pgOpts.nums) { pool += nSet; requiredSets.push(nSet); }
+            if (pgOpts.syms) { pool += sSet; requiredSets.push(sSet); }
+
+            if (!pool) {
+                pool = lSet;
+                requiredSets.push(lSet);
+            }
+
+            const randValues = new Uint32Array(len + 32);
+            window.crypto.getRandomValues(randValues);
+            let randIdx = 0;
+
+            const chars = [];
+            for (let i = 0; i < requiredSets.length && i < len; i++) {
+                const set = requiredSets[i];
+                chars.push(set[randValues[randIdx++] % set.length]);
+            }
+
+            while (chars.length < len) {
+                chars.push(pool[randValues[randIdx++] % pool.length]);
+            }
+
+            for (let i = chars.length - 1; i > 0; i--) {
+                const j = randValues[randIdx++] % (i + 1);
+                const tmp = chars[i];
+                chars[i] = chars[j];
+                chars[j] = tmp;
+            }
+
+            const entropy = Math.round(len * Math.log2(pool.length));
+            if (pgEntropyVal) pgEntropyVal.textContent = `${entropy} bits`;
+
+            if (pgStrengthVal) {
+                if (entropy >= 120) {
+                    pgStrengthVal.textContent = 'MIL-SPEC / MAXIMUM';
+                    pgStrengthVal.style.color = '#7bd88f';
+                } else if (entropy >= 80) {
+                    pgStrengthVal.textContent = 'VERY STRONG';
+                    pgStrengthVal.style.color = '#7bd88f';
+                } else if (entropy >= 60) {
+                    pgStrengthVal.textContent = 'STRONG';
+                    pgStrengthVal.style.color = '#7bd88f';
+                } else if (entropy >= 40) {
+                    pgStrengthVal.textContent = 'MODERATE';
+                    pgStrengthVal.style.color = '#f7931a';
+                } else {
+                    pgStrengthVal.textContent = 'WEAK';
+                    pgStrengthVal.style.color = '#ff3333';
+                }
+            }
+
+            let coloredHtml = '';
+            for (let i = 0; i < chars.length; i++) {
+                const c = chars[i];
+                if (/[0-9]/.test(c)) {
+                    coloredHtml += `<span style="color:#5bc0de;">${c}</span>`;
+                } else if (/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(c)) {
+                    const esc = c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '&' ? '&amp;' : c;
+                    coloredHtml += `<span style="color:var(--accent);">${esc}</span>`;
+                } else if (/[A-Z]/.test(c)) {
+                    coloredHtml += `<span style="color:#ffffff; font-weight:500;">${c}</span>`;
+                } else {
+                    coloredHtml += `<span style="color:#cccccc;">${c}</span>`;
+                }
+            }
+            pgOutput.innerHTML = coloredHtml;
+            pgOutput.setAttribute('data-raw', chars.join(''));
+        }
+
+        if (pgLengthSlider) {
+            pgLengthSlider.addEventListener('input', generatePassword);
+        }
+
+        document.querySelectorAll('.cyber-pill-toggle').forEach(pill => {
+            pill.addEventListener('click', () => {
+                const opt = pill.getAttribute('data-opt');
+                if (!opt) return;
+                if (opt === 'noamb') {
+                    pgOpts.noamb = !pgOpts.noamb;
+                    pill.classList.toggle('active', pgOpts.noamb);
+                } else {
+                    const activeKeys = ['upper', 'lower', 'nums', 'syms'].filter(k => pgOpts[k]);
+                    if (pgOpts[opt] && activeKeys.length <= 1) return;
+                    pgOpts[opt] = !pgOpts[opt];
+                    pill.classList.toggle('active', pgOpts[opt]);
+                }
+                generatePassword();
+            });
+        });
+
+        if (pgGenBtn) pgGenBtn.addEventListener('click', generatePassword);
+
+        if (pgCopyBtn) {
+            pgCopyBtn.addEventListener('click', () => {
+                const raw = pgOutput ? pgOutput.getAttribute('data-raw') : '';
+                if (raw) {
+                    fallback(raw, () => {
+                        const dict = i18n[currentLang] || i18n.en;
+                        pgCopyBtn.textContent = dict.copied || 'COPIED';
+                        pgCopyBtn.classList.add('copied');
+                        setTimeout(() => {
+                            pgCopyBtn.textContent = dict.copy || 'COPY';
+                            pgCopyBtn.classList.remove('copied');
+                        }, 1500);
+                    });
+                }
+            });
+        }
+        generatePassword();
+
+        let cmSeed = 0;
+        let cmExpectedKey = 0;
+        const cmSeedVal = document.getElementById('cmSeedVal');
+        const cmStatusVal = document.getElementById('cmStatusVal');
+        const cmKeyInput = document.getElementById('cmKeyInput');
+        const cmConsole = document.getElementById('cmConsole');
+        const cmVerifyBtn = document.getElementById('cmVerifyBtn');
+        const cmTraceBtn = document.getElementById('cmTraceBtn');
+        const cmNewBtn = document.getElementById('cmNewBtn');
+
+        function computeCrackme(seed) {
+            const r1 = (seed ^ 0x1337) & 0xFFFF;
+            const r2 = (((r1 << 4) & 0xFFFF) | ((r1 >>> 12) & 0xFFFF)) & 0xFFFF;
+            const r3 = (r2 + 0x05A0) & 0xFFFF;
+            const key = (r3 ^ 0xDEAD) & 0xFFFF;
+            return { r1, r2, r3, key };
+        }
+
+        function initCrackme() {
+            cmSeed = Math.floor(Math.random() * 0xEFFF) + 0x1000;
+            const calc = computeCrackme(cmSeed);
+            cmExpectedKey = calc.key;
+            const hexSeed = '0x' + cmSeed.toString(16).toUpperCase().padStart(4, '0');
+            if (cmSeedVal) cmSeedVal.textContent = hexSeed;
+            if (cmStatusVal) {
+                cmStatusVal.textContent = 'LOCKED';
+                cmStatusVal.style.color = '#ff3333';
+            }
+            if (cmKeyInput) {
+                cmKeyInput.value = '';
+                cmKeyInput.style.borderColor = 'var(--border)';
+            }
+            if (cmConsole) {
+                cmConsole.textContent = `[DEBUGGER] Attached to crackme target process (PID 0x1337).
+[DEBUGGER] Dynamic session seed initialized: ${hexSeed}
+[DEBUGGER] Breakpoint established at 0x00401013 (CMP AX, [KEY]).
+[DEBUGGER] Ready. Disassemble the routine and input the computed key.`;
+            }
+        }
+
+        function appendCmLog(line) {
+            if (!cmConsole) return;
+            cmConsole.textContent += '\n' + line;
+            cmConsole.scrollTop = cmConsole.scrollHeight;
+        }
+
+        function verifyCrackme() {
+            if (!cmKeyInput) return;
+            const val = cmKeyInput.value.trim();
+            if (!val) {
+                appendCmLog('[-] [DEBUGGER] Input buffer empty. Enter candidate key.');
+                return;
+            }
+            let parsed;
+            if (val.toLowerCase().startsWith('0x')) {
+                parsed = parseInt(val, 16);
+            } else if (/^[0-9a-fA-F]{1,4}$/.test(val) && isNaN(Number(val))) {
+                parsed = parseInt(val, 16);
+            } else {
+                parsed = parseInt(val, 10);
+                if (isNaN(parsed)) parsed = parseInt(val, 16);
+            }
+
+            if (isNaN(parsed)) {
+                appendCmLog(`[-] [DEBUGGER] Failed to parse input token: "${val}"`);
+                return;
+            }
+
+            const userKey = parsed & 0xFFFF;
+            const userHex = '0x' + userKey.toString(16).toUpperCase().padStart(4, '0');
+            const expHex = '0x' + cmExpectedKey.toString(16).toUpperCase().padStart(4, '0');
+
+            appendCmLog(`[*] HIT BP: 0x00401013 (CMP AX, [KEY])`);
+            appendCmLog(`[*] REGISTER AX = ${expHex}  |  INPUT KEY = ${userHex} (${userKey})`);
+
+            if (userKey === cmExpectedKey) {
+                appendCmLog(`[+] ZERO FLAG (ZF) = 1 (CMP MATCH CONFIRMED)`);
+                appendCmLog(`[+] EXPLOIT ROUTINE PASSED: Patch validated!`);
+                appendCmLog(`[+] CRACKME SOLVED! FLAG: FLAG{U_4R3_A_L4RP3R_${expHex}_xD}`);
+                if (cmStatusVal) {
+                    cmStatusVal.textContent = 'UNLOCKED';
+                    cmStatusVal.style.color = '#7bd88f';
+                }
+                cmKeyInput.style.borderColor = '#7bd88f';
+            } else {
+                appendCmLog(`[-] ZERO FLAG (ZF) = 0 (MISMATCH)`);
+                appendCmLog(`[-] ACCESS DENIED: Key validation failed for seed 0x${cmSeed.toString(16).toUpperCase().padStart(4, '0')}.`);
+                appendCmLog(`[-] HINT: Check the 16-bit left rotate (ROL 4) and XOR masks.`);
+                if (cmStatusVal) {
+                    cmStatusVal.textContent = 'LOCKED';
+                    cmStatusVal.style.color = '#ff3333';
+                }
+                cmKeyInput.style.borderColor = '#ff3333';
+            }
+        }
+
+        function traceCrackme() {
+            const calc = computeCrackme(cmSeed);
+            const sHex = '0x' + cmSeed.toString(16).toUpperCase().padStart(4, '0');
+            const r1Hex = '0x' + calc.r1.toString(16).toUpperCase().padStart(4, '0');
+            const r2Hex = '0x' + calc.r2.toString(16).toUpperCase().padStart(4, '0');
+            const r3Hex = '0x' + calc.r3.toString(16).toUpperCase().padStart(4, '0');
+            const kHex = '0x' + calc.key.toString(16).toUpperCase().padStart(4, '0');
+
+            appendCmLog(`--- [REGISTER EXECUTION TRACE FOR SEED ${sHex}] ---`);
+            appendCmLog(`[TRACE] 0x00401000  MOV AX, [SEED]    => AX = ${sHex}`);
+            appendCmLog(`[TRACE] 0x00401004  XOR AX, 0x1337    => AX = ${r1Hex}`);
+            appendCmLog(`[TRACE] 0x00401008  ROL AX, 4         => AX = ${r2Hex}`);
+            appendCmLog(`[TRACE] 0x0040100B  ADD AX, 0x05A0    => AX = ${r3Hex}`);
+            appendCmLog(`[TRACE] 0x0040100F  XOR AX, 0xDEAD    => AX = ${kHex} (Decimal: ${calc.key})`);
+            appendCmLog(`[TRACE] 0x00401013  CMP AX, [KEY]     => Expected unlock key is ${kHex}`);
+        }
+
+        if (cmVerifyBtn) cmVerifyBtn.addEventListener('click', verifyCrackme);
+        if (cmTraceBtn) cmTraceBtn.addEventListener('click', traceCrackme);
+        if (cmNewBtn) cmNewBtn.addEventListener('click', initCrackme);
+        if (cmKeyInput) {
+            cmKeyInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') verifyCrackme();
+            });
+        }
+        initCrackme();
+
         const cursorDot = document.getElementById('cursorDot');
         const cursorRing = document.getElementById('cursorRing');
         let mouseX = 0, mouseY = 0;
@@ -1183,13 +3289,9 @@
         }
         renderCursor();
 
-        document.querySelectorAll('a, button, .glass-panel').forEach(el => {
-            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-active'));
-            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-active'));
-        });
-
         document.querySelectorAll('.glass-panel').forEach(card => {
             card.addEventListener('mousemove', e => {
+                if (card.classList.contains('tool-panel') && e.target.tagName && ['INPUT', 'TEXTAREA', 'BUTTON'].includes(e.target.tagName)) return;
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
