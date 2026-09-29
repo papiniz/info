@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>papiniz</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-main: #030303;
+            --bg-card: rgba(10, 10, 10, 0.4);
+            --bg-hover: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 51, 51, 0.3);
+            --text-primary: #f0f0f0;
+            --text-secondary: #999;
+            --text-muted: #555;
+            --accent: #ff3333;
+            --accent-glow: rgba(255, 51, 51, 0.15);
+            --transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            background: var(--bg-main);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: transparent;
+        }
+
+        body.locked {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .lock-scene {
+            position: relative;
+            width: 240px;
+            height: 240px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .glow-ring {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 51, 51, 0.25), transparent 70%);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.8s ease;
+        }
+
+        .lock-scene.opening .glow-ring {
+            opacity: 1;
+            transform: scale(2.2);
+        }
+
+        .lock-svg {
+            width: 90px;
+            height: 90px;
+            color: #222;
+            z-index: 2;
+            overflow: visible;
+            transition: color 0.5s, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .lock-scene.opening .lock-svg {
+            color: var(--accent);
+            transform: scale(1.15);
+        }
+
+        .lock-shackle {
+            transform-origin: 26px 24px;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .lock-scene.opening .lock-shackle {
+            transform: translateY(-8px) rotate(-15deg);
+        }
+
+        .key-svg {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            color: #444;
+            z-index: 3;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateX(-150px) rotate(-45deg);
+            opacity: 0;
+            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .lock-scene.inserting .key-svg {
+            opacity: 1;
+            transform: translate(-50%, -50%) translateX(-15px) rotate(0deg);
+            color: #888;
+        }
+
+        .lock-scene.turning .key-svg {
+            transform: translate(-50%, -50%) translateX(-15px) rotate(90deg);
+            color: var(--accent);
+        }
+
+        .lock-scene.opening .key-svg {
+            opacity: 0;
+            transform: translate(-50%, -50%) translateX(-15px) rotate(90deg) scale(0.3);
+        }
+
+        .splash-text {
+            margin-top: 35px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #444;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            transition: color 0.5s, text-shadow 0.5s, letter-spacing 0.5s;
+        }
+
+        .lock-scene.opening~.splash-text {
+            color: var(--accent);
+            text-shadow: 0 0 12px rgba(255, 51, 51, 0.6);
+            letter-spacing: 7px;
+        }
+
+        .splash-terminal {
+            margin-top: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            height: 15px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 80px 24px;
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 40px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1.2s ease, transform 1.2s ease;
+        }
+
+        body:not(.locked) .container {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 60px 20px;
+            }
+        }
+
+        .glass-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            transition: var(--transition);
+        }
+
+        .glass-panel:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8), 0 0 20px var(--accent-glow);
+        }
+
+        .lang-selector {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 100;
+            display: flex;
+            gap: 4px;
+            padding: 6px;
+            border-radius: 10px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .lang-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-btn.active {
+            color: var(--bg-main);
+            background: var(--accent);
+            font-weight: 600;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .profile-card {
+            padding: 40px 24px;
+            text-align: center;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            z-index: 2;
+            position: relative;
+            background: #111;
+        }
+
+        .avatar-glow {
+            position: absolute;
+            inset: -5px;
+            background: linear-gradient(45deg, var(--accent), transparent, var(--accent));
+            border-radius: 32px;
+            filter: blur(15px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1;
+        }
+
+        .profile-card:hover .avatar-glow {
+            opacity: 0.5;
+            animation: spin 4s linear infinite;
+        }
+
+        .name { position: relative; font-size: 24px; font-weight: 600; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; color: #fff; }
+        .name:hover {
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .tagline {
+            color: var(--accent);
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 10px;
+            transition: var(--transition);
+        }
+
+        .stat-box:hover {
+            border-color: var(--border-hover);
+            background: rgba(255, 51, 51, 0.05);
+        }
+
+        .stat-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 22px;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .social-btn:hover {
+            color: var(--bg-main);
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--accent-glow);
+        }
+
+        .social-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .section-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .section-title::before {
+            content: '/>';
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+        }
+
+        .bio-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            padding: 24px 30px;
+        }
+
+        .bio-text span.highlight {
+            color: var(--text-primary);
+            font-weight: 500;
+            border-bottom: 1px solid var(--accent-glow);
+        }
+
+        .expertise-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .expertise-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .exp-card {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exp-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--accent);
+        }
+
+        .exp-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .exp-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .exp-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: var(--transition);
+            transform-origin: top;
+        }
+
+        .exp-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .tools-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+        }
+
+        .tool-item {
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .tool-item:hover {
+            color: #fff;
+            background: rgba(255, 51, 51, 0.05);
+            border-color: var(--border-hover);
+            transform: translateX(5px);
+        }
+
+        .tool-bullet {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .btc-card {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: linear-gradient(135deg, rgba(247, 147, 26, 0.05), rgba(0, 0, 0, 0.5));
+        }
+
+        .btc-card:hover {
+            border-color: rgba(247, 147, 26, 0.3);
+            box-shadow: 0 0 20px rgba(247, 147, 26, 0.1);
+        }
+
+        .btc-icon {
+            color: #f7931a;
+            width: 36px;
+            height: 36px;
+        }
+
+        .btc-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .btc-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .btc-address {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .copy-btn:hover {
+            background: rgba(247, 147, 26, 0.1);
+            color: #f7931a;
+            border-color: #f7931a;
+        }
+
+        .copy-btn.copied {
+            background: #f7931a;
+            color: #000;
+            font-weight: bold;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        [dir="rtl"] .section-title::after {
+            background: linear-gradient(-90deg, var(--border), transparent);
+        }
+
+        [dir="rtl"] .tool-item:hover {
+            transform: translateX(-5px);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #222;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        body, a, button { cursor: none; }
+        .cursor-dot, .cursor-ring {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+        }
+        .cursor-dot {
+            width: 6px; height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            transition: width 0.2s, height 0.2s;
+        }
+        .cursor-ring {
+            width: 30px; height: 30px;
+            border: 1px solid rgba(255, 51, 51, 0.4);
+            border-radius: 50%;
+            transition: width 0.2s, height 0.2s, transform 0.1s ease-out;
+        }
+        .cursor-active .cursor-ring {
+            width: 50px; height: 50px;
+            background: rgba(255, 51, 51, 0.05);
+            border-color: rgba(255, 51, 51, 0.8);
+        }
+        .cursor-active .cursor-dot {
+            width: 0; height: 0;
+        }
+
+        .tech-badge {
+            font-size: 10px; font-family: 'JetBrains Mono', monospace;
+            padding: 4px 8px; background: rgba(255, 51, 51, 0.05);
+            color: var(--accent); border-radius: 6px;
+            border: 1px solid rgba(255, 51, 51, 0.15);
+            transition: var(--transition);
+        }
+        .tech-badge:hover { background: rgba(255, 51, 51, 0.15); transform: translateY(-2px); }
+    </style>
+</head>
+
+<body class="locked">
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <canvas id="bgCanvas"></canvas>
+
+    <div id="splash">
+        <div class="lock-scene" id="lockScene">
+            <div class="glow-ring"></div>
+
+            <svg class="key-svg" id="key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="7" cy="12" r="3"></circle>
+                <path d="M10 12h11v-2h-3v-2h-3v4"></path>
+            </svg>
+
+            <svg class="lock-svg" viewBox="-5 -5 74 74" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path class="lock-shackle" d="M18 28 V18 A14 14 0 0 1 46 18 V28" />
+                <rect x="12" y="28" width="40" height="28" rx="4" fill="#050505" stroke="currentColor" />
+                <circle cx="32" cy="40" r="3" fill="currentColor" stroke="none" />
+                <path d="M32 43 L32 48" stroke="currentColor" stroke-width="2" />
+            </svg>
+        </div>
+        <div class="splash-text" id="splashText">INITIALIZING_SESSION</div>
+        <div class="splash-terminal" id="splashTerm"></div>
+    </div>
+
+    <div class="lang-selector glass-panel" id="langSelector">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="tr">TR</button>
+        <button class="lang-btn" data-lang="de">DE</button>
+        <button class="lang-btn" data-lang="ru">RU</button>
+        <button class="lang-btn" data-lang="zh">ZH</button>
+        <button class="lang-btn" data-lang="he">HE</button>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="profile-card glass-panel">
+                <div class="avatar-container">
+                    <div class="avatar-glow"></div>
+                    <img src="profile.png" alt="papiniz" class="avatar"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzExMSIvPjwvc3ZnPg==';">
+                </div>
+                <div class="name">papiniz</div>
+                <div class="tagline">bilgi.cat</div>
+
+                <div style="display:flex; gap: 8px; justify-content:center; flex-wrap:wrap; margin-bottom: 24px;">
+                    <span class="tech-badge">C++</span>
+                    <span class="tech-badge">ASM</span>
+                    <span class="tech-badge">LUA</span>
+                    <span class="tech-badge">RE</span>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-val">4+</div>
+                        <div class="stat-label" data-i18n="stat_years">Years Exp</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val">18+</div>
+                        <div class="stat-label" data-i18n="stat_projects">Projects</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:center;">
+                    <button id="discordBtn" class="social-btn" title="Copy Discord Username">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M20.3 4.5A19.8 19.8 0 0 0 15.4 3c-.2.4-.4.9-.6 1.3a18.3 18.3 0 0 0-5.5 0c-.2-.4-.4-.9-.6-1.3a19.8 19.8 0 0 0-4.9 1.5C.7 8.7-.1 12.7.3 16.7a20 20 0 0 0 6 3c.5-.6.9-1.3 1.3-2-.7-.3-1.4-.6-2-1l.5-.4a14.3 14.3 0 0 0 12.3 0l.5.4c-.6.4-1.3.7-2 1 .4.7.8 1.4 1.3 2a20 20 0 0 0 6-3c.5-4.6-.7-8.6-3.9-12.2ZM8.3 14.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.1 1.1 2.1 2.4-.9 2.4-2.1 2.4Zm7.4 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.1 1.1 2.1 2.4-.9 2.4-2.1 2.4Z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div>
+                <div class="section-title" data-i18n="title_about">About Me</div>
+                <div class="bio-text glass-panel" data-i18n="bio">
+                    Deep exploration of low-level Windows internals, reverse engineering, and offensive security
+                    research.
+                    <span class="highlight">I develop advanced evasion tools, custom obfuscators, and UEFI
+                        implementations.</span>
+                    Beyond code, I have advanced proficiency in visual design (Photoshop, Premiere) and game engine
+                    development (Unity).
+                    Operating strictly anonymously. Currently engineering a Linux-based OS designed for 100% anonymity.
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title" data-i18n="title_expertise">Core Expertise</div>
+                <div class="expertise-grid">
+                    <div class="exp-card glass-panel">
+                        <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                            </path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                        <div class="exp-title" data-i18n="exp_uefi_title">Kernel & UEFI</div>
+                        <div class="exp-desc" data-i18n="exp_uefi_desc">Development of custom UEFI boot modules, driver
+                            mapping techniques, and manipulation of Windows kernel defenses (Patchguard/DSE).</div>
+                    </div>
+                    <div class="exp-card glass-panel">
+                        <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <div class="exp-title" data-i18n="exp_fud_title">Evasion & FUD</div>
+                        <div class="exp-desc" data-i18n="exp_fud_desc">Implementation of advanced evasion methodologies
+                            to bypass dynamic/static analysis, ensuring payloads remain Fully Undetectable (FUD).</div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title" data-i18n="title_tools">Offensive Tooling</div>
+                <div class="tools-list">
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>PatchGuard Patcher</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Custom Antivirus</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Local Signer Patcher</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Lua Obfuscator</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Lua Deobfuscator</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Private Cheat Reversals</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>P2C Software Cracks</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Anti-Cheat Emulators</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>C++ Protector</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Auth System</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Vanguard Emulator</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>HWID Spoofer</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Stealer Framework</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Evasion Engine</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title" data-i18n="title_creative">Creative Software / Engine</div>
+                <div class="tools-list">
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Unity — 3D FPS</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Unity — 2D Turn-Based</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Photoshop — Advanced</div>
+                    <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Premiere Pro — Advanced</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title" data-i18n="title_support">Support</div>
+                <div class="btc-card glass-panel">
+                    <svg class="btc-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M23.6 15c-1.6 6.4-8.1 10.3-14.5 8.7C2.7 22.1-1.2 15.6.4 9.2 2 2.8 8.5-1.1 14.9.5c6.4 1.6 10.3 8.1 8.7 14.5zM17.3 10.3c.2-1.6-1-2.5-2.6-3l.5-2.1-1.3-.3-.5 2c-.3-.1-.7-.2-1-.2l.5-2.1-1.3-.3-.5 2.1-2.4-.6-.3 1.4s1 .2 1 .2c.5.1.6.5.6.7l-1.4 5.6c-.1.2-.2.4-.6.3 0 0-.9-.2-.9-.2l-.6 1.5 2.3.6-.5 2.1 1.3.3.5-2.1c.3.1.7.2 1 .3l-.5 2.1 1.3.3.5-2.1c2.2.4 3.8.2 4.5-1.7.6-1.6 0-2.5-1.1-3.1.8-.2 1.4-.7 1.6-1.8zm-3 3.9c-.4 1.6-3 0.7-3.9.5l.7-2.8c.9.2 3.6.7 3.2 2.3zm.4-3.9c-.3 1.4-2.5.7-3.2.5l.6-2.5c.8.2 3.1.5 2.6 2z" />
+                    </svg>
+                    <div class="btc-info">
+                        <div class="btc-label" data-i18n="btc_label">Bitcoin Address</div>
+                        <div class="btc-address" id="btcAddr">bc1qt4v9tdactx3q40hsmwegdh7cnj4zgdltckalus</div>
+                    </div>
+                    <button class="copy-btn" id="btcCopy" data-i18n="copy_btn">COPY</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const splash = document.getElementById('splash');
+        const lockScene = document.getElementById('lockScene');
+        const splashText = document.getElementById('splashText');
+        const splashTerm = document.getElementById('splashTerm');
+
+        const loadingProjects = [
+            "Loading module: PatchGuard Patcher...",
+            "Loading module: Vanguard Emulator...",
+            "Loading module: Custom Antivirus...",
+            "Loading module: Lua Obfuscator...",
+            "Loading module: Stealer Framework...",
+            "Loading module: Evasion Engine...",
+            "Loading module: HWID Spoofer...",
+            "Loading module: Private Cheat Reversal..."
+        ];
+
+        let termInterval;
+
+        setTimeout(() => {
+            splashText.innerText = "AUTHENTICATING";
+            lockScene.classList.add('inserting');
+
+            let i = 0;
+            termInterval = setInterval(() => {
+                if (i < loadingProjects.length) {
+                    splashTerm.innerText = loadingProjects[i];
+                    i++;
+                }
+            }, 80);
+
+            setTimeout(() => {
+                splashText.innerText = "DECRYPTING_PAYLOAD";
+                lockScene.classList.replace('inserting', 'turning');
+
+                setTimeout(() => {
+                    clearInterval(termInterval);
+                    splashTerm.innerText = "";
+                    splashText.innerText = "ACCESS_GRANTED";
+                    lockScene.classList.replace('turning', 'opening');
+
+                    setTimeout(() => {
+                        splash.style.opacity = '0';
+                        document.body.classList.remove('locked');
+                        setTimeout(() => {
+                            splash.remove();
+                        }, 800);
+                    }, 900);
+                }, 700);
+            }, 600);
+        }, 400);
+
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let w, h;
+
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        const bgType = Math.floor(Math.random() * 5);
+        let particles = [];
+        let time = 0;
+
+        if (bgType === 0) {
+            for (let i = 0; i < 200; i++) particles.push({ x: Math.random() * w, y: Math.random() * h, l: Math.random() * 20 + 10, s: Math.random() * 15 + 5 });
+        } else if (bgType === 1) {
+            for (let i = 0; i < 300; i++) particles.push({ x: (Math.random() - 0.5) * w * 2, y: (Math.random() - 0.5) * h * 2, z: Math.random() * w, s: (Math.random() * 2) + 0.5 });
+        } else if (bgType === 2) {
+            for (let i = 0; i < 150; i++) particles.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 2 + 1, d: Math.random() * w, s: Math.random() * 1 + 0.5 });
+        } else if (bgType === 4) {
+            for (let i = 0; i < 400; i++) particles.push({ x: Math.random() * w - w / 2, y: Math.random() * h - h / 2, z: Math.random() * w });
+        }
+
+        function drawBg() {
+            if (bgType === 3) {
+                ctx.fillStyle = 'rgba(3, 3, 3, 0.1)';
+            } else {
+                ctx.fillStyle = 'rgba(3, 3, 3, 0.4)';
+            }
+            ctx.fillRect(0, 0, w, h);
+
+            if (bgType === 0) {
+                ctx.strokeStyle = 'rgba(255, 51, 51, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                particles.forEach(p => {
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x, p.y + p.l);
+                    p.y += p.s;
+                    if (p.y > h) { p.y = -p.l; p.x = Math.random() * w; }
+                });
+                ctx.stroke();
+            } else if (bgType === 1) {
+                particles.forEach(p => {
+                    p.z -= p.s;
+                    if (p.z <= 0) { p.x = (Math.random() - 0.5) * w * 2; p.y = (Math.random() - 0.5) * h * 2; p.z = w; }
+                    let px = (p.x / p.z) * 500 + w / 2;
+                    let py = (p.y / p.z) * 500 + h / 2;
+                    let s = (1 - p.z / w) * 2.5;
+                    if (px > 0 && px < w && py > 0 && py < h) {
+                        ctx.fillStyle = `rgba(255, 51, 51, ${1 - p.z / w})`;
+                        ctx.beginPath(); ctx.arc(px, py, s, 0, Math.PI * 2); ctx.fill();
+                    }
+                });
+            } else if (bgType === 2) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                time += 0.01;
+                ctx.beginPath();
+                particles.forEach(p => {
+                    p.y += p.s;
+                    let px = p.x + Math.sin(p.d + time) * 20;
+                    if (p.y > h) { p.y = -10; p.x = Math.random() * w; }
+                    ctx.moveTo(px, p.y);
+                    ctx.arc(px, p.y, p.r, 0, Math.PI * 2);
+                });
+                ctx.fill();
+            } else if (bgType === 3) {
+                time += 0.005;
+                let grad = ctx.createLinearGradient(0, 0, w, h);
+                grad.addColorStop(0, 'rgba(3, 3, 3, 0.05)');
+                grad.addColorStop(1, 'rgba(10, 30, 20, 0.05)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                ctx.beginPath();
+                for (let i = 0; i < w; i += 20) {
+                    let y = h / 2 + Math.sin(i * 0.005 + time) * 150 + Math.cos(i * 0.01 - time) * 100;
+                    ctx.lineTo(i, y);
+                }
+                ctx.lineTo(w, h);
+                ctx.lineTo(0, h);
+                ctx.fillStyle = 'rgba(255, 51, 51, 0.02)';
+                ctx.fill();
+
+                ctx.beginPath();
+                for (let i = 0; i < w; i += 20) {
+                    let y = h / 2 - 100 + Math.sin(i * 0.003 - time) * 200 + Math.cos(i * 0.008 + time) * 50;
+                    ctx.lineTo(i, y);
+                }
+                ctx.lineTo(w, h);
+                ctx.lineTo(0, h);
+                ctx.fillStyle = 'rgba(255, 51, 51, 0.015)';
+                ctx.fill();
+            } else if (bgType === 4) {
+                particles.forEach(p => {
+                    let px1 = (p.x / p.z) * 300 + w / 2;
+                    let py1 = (p.y / p.z) * 300 + h / 2;
+                    p.z -= 5;
+                    if (p.z <= 0) { p.x = Math.random() * w - w / 2; p.y = Math.random() * h - h / 2; p.z = w; }
+                    let px2 = (p.x / p.z) * 300 + w / 2;
+                    let py2 = (p.y / p.z) * 300 + h / 2;
+
+                    if (px1 > 0 && px1 < w && py1 > 0 && py1 < h) {
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - p.z / w})`;
+                        ctx.lineWidth = (1 - p.z / w) * 3;
+                        ctx.beginPath();
+                        ctx.moveTo(px1, py1);
+                        ctx.lineTo(px2, py2);
+                        ctx.stroke();
+                    }
+                });
+            }
+            requestAnimationFrame(drawBg);
+        }
+        drawBg();
+
+        const i18n = {
+            en: {
+                stat_years: "Years Exp",
+                stat_projects: "Projects",
+                title_about: "About Me",
+                bio: "Deep exploration of low-level Windows internals, reverse engineering, and offensive security research. <span class='highlight'>I develop advanced evasion tools, custom obfuscators, and UEFI implementations.</span> Beyond code, I have advanced proficiency in visual design and game engine development. Operating strictly anonymously. Currently engineering a Linux-based OS designed for 100% anonymity.",
+                title_expertise: "Core Expertise",
+                exp_uefi_title: "Kernel & UEFI",
+                exp_uefi_desc: "Development of custom UEFI boot modules, driver mapping techniques, and manipulation of Windows kernel defenses (Patchguard/DSE).",
+                exp_fud_title: "Evasion & FUD",
+                exp_fud_desc: "Implementation of advanced evasion methodologies to bypass dynamic/static analysis, ensuring payloads remain Fully Undetectable (FUD).",
+                title_tools: "Offensive Tooling",
+                title_creative: "Creative Software / Engine",
+                title_support: "Support",
+                btc_label: "Bitcoin Address",
+                copy_btn: "COPY",
+                copied_btn: "COPIED"
+            },
+            tr: {
+                stat_years: "Yıl Deneyim",
+                stat_projects: "Proje",
+                title_about: "Hakkımda",
+                bio: "Düşük seviye Windows içyapısı, tersine mühendislik ve ofansif güvenlik araştırmaları. <span class='highlight'>Gelişmiş kaçınma araçları, özel obfuscatörler ve UEFI hileleri geliştiriyorum.</span> Kod dışında görsel tasarım ve oyun motoru konularında ileri düzeydeyim. Tamamen isimsiz kalmayı tercih ediyorum. Şu anda %100 anonimlik odaklı, Linux tabanlı özel bir işletim sistemi (OS) geliştiriyorum.",
+                title_expertise: "Temel Uzmanlık",
+                exp_uefi_title: "Kernel & UEFI",
+                exp_uefi_desc: "Özel UEFI boot modüllerinin geliştirilmesi, sürücü haritalama ve Windows çekirdek savunmalarının (Patchguard/DSE) manipülasyonu.",
+                exp_fud_title: "Evasion & FUD",
+                exp_fud_desc: "Dinamik/statik analizleri atlatmak ve payload'ların Tamamen Tespit Edilemez (FUD) kalmasını sağlamak için gelişmiş yöntemler.",
+                title_tools: "Offensive Araçlar",
+                title_creative: "Kreatif Yazılım / Motor",
+                title_support: "Destek",
+                btc_label: "Bitcoin Adresi",
+                copy_btn: "KOPYALA",
+                copied_btn: "KOPYALANDI"
+            },
+            de: {
+                stat_years: "Jahre Erf.",
+                stat_projects: "Projekte",
+                title_about: "Über Mich",
+                bio: "Tiefe Erforschung von Windows-Interna auf niedriger Ebene, Reverse Engineering und offensive Sicherheitsforschung. <span class='highlight'>Ich entwickle fortschrittliche Evasion-Tools, benutzerdefinierte Obfuskatoren und UEFI-Implementierungen.</span> Streng anonym. Derzeit entwickle ich ein Linux-basiertes Betriebssystem für 100%ige Anonymität.",
+                title_expertise: "Kernkompetenzen",
+                exp_uefi_title: "Kernel & UEFI",
+                exp_uefi_desc: "Entwicklung von benutzerdefinierten UEFI-Boot-Modulen, Treiber-Mapping und Manipulation von Windows-Kernel-Verteidigungen.",
+                exp_fud_title: "Evasion & FUD",
+                exp_fud_desc: "Implementierung fortschrittlicher Umgehungsmethoden zur Umgehung dynamischer/statischer Analysen (FUD).",
+                title_tools: "Offensive Werkzeuge",
+                title_creative: "Kreative Software / Engine",
+                title_support: "Unterstützen",
+                btc_label: "Bitcoin-Adresse",
+                copy_btn: "KOPIEREN",
+                copied_btn: "KOPIERT"
+            },
+            ru: {
+                stat_years: "Лет опыта",
+                stat_projects: "Проекты",
+                title_about: "Обо Мне",
+                bio: "Глубокое изучение низкоуровневых механизмов Windows, реверс-инжиниринг и исследования в области наступательной безопасности. <span class='highlight'>Я разрабатываю передовые инструменты обхода, кастомные обфускаторы и UEFI модули.</span> Строго анонимно. В настоящее время разрабатываю ОС на базе Linux для 100% анонимности.",
+                title_expertise: "Основные компетенции",
+                exp_uefi_title: "Kernel & UEFI",
+                exp_uefi_desc: "Разработка пользовательских загрузочных модулей UEFI, методов маппинга драйверов и манипулирования защитой ядра Windows.",
+                exp_fud_title: "Evasion & FUD",
+                exp_fud_desc: "Внедрение передовых методологий уклонения для обхода динамического/статического анализа (FUD).",
+                title_tools: "Наступательные инструменты",
+                title_creative: "ПО и Движки",
+                title_support: "Поддержка",
+                btc_label: "Биткоин-адрес",
+                copy_btn: "КОПИРОВАТЬ",
+                copied_btn: "СКОПИРОВАНО"
+            },
+            zh: {
+                stat_years: "年经验",
+                stat_projects: "项目数",
+                title_about: "关于我",
+                bio: "深入研究底层Windows内部机制、逆向工程和进攻性安全。<span class='highlight'>我开发高级规避工具、自定义混淆器和UEFI实现。</span> 严格保持匿名。目前正在开发一款旨在实现100%匿名的基于Linux的操作系统。",
+                title_expertise: "核心专长",
+                exp_uefi_title: "内核与UEFI",
+                exp_uefi_desc: "开发自定义UEFI引导模块、驱动程序映射技术以及操作Windows内核防御 (Patchguard/DSE)。",
+                exp_fud_title: "规避与FUD",
+                exp_fud_desc: "实施高级规避方法以绕过动态/静态分析，确保有效载荷保持完全不可检测 (FUD)。",
+                title_tools: "进攻性工具",
+                title_creative: "创意软件/引擎",
+                title_support: "支持",
+                btc_label: "比特币地址",
+                copy_btn: "复制",
+                copied_btn: "已复制"
+            },
+            he: {
+                stat_years: "שנות ניסיון",
+                stat_projects: "פרויקטים",
+                title_about: "עליי",
+                bio: "חקר מעמיק של קרביים של Windows, הנדסה הפוכה ומחקר אבטחה התקפי. <span class='highlight'>אני מפתח כלי התחמקות מתקדמים, אובפוסקטורים מותאמים אישית ויישומי UEFI.</span> פועל באופן אנונימי לחלוטין. כרגע מפתח מערכת הפעלה מבוססת Linux לאנונימיות של 100%.",
+                title_expertise: "מומחיות ליבה",
+                exp_uefi_title: "ליבה ו-UEFI",
+                exp_uefi_desc: "פיתוח מודולי אתחול UEFI, טכניקות מיפוי מנהלי התקנים ומניפולציה של הגנות ליבת Windows.",
+                exp_fud_title: "התחמקות ו-FUD",
+                exp_fud_desc: "יישום מתודולוגיות התחמקות מתקדמות לעקיפת ניתוח דינמי/סטטי (FUD).",
+                title_tools: "כלים התקפיים",
+                title_creative: "תוכנה ומנועים",
+                title_support: "תמיכה",
+                btc_label: "כתובת ביטקוין",
+                copy_btn: "העתק",
+                copied_btn: "הועתק"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const dict = i18n[lang];
+            if (!dict) return;
+
+            document.documentElement.lang = lang;
+            document.documentElement.dir = (lang === 'he') ? 'rtl' : 'ltr';
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    if (el.tagName.toLowerCase() === 'div' && key === 'bio') {
+                        el.innerHTML = dict[key];
+                    } else {
+                        el.textContent = dict[key];
+                    }
+                }
+            });
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+            });
+        }
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => setLanguage(btn.getAttribute('data-lang')));
+        });
+
+        function fallback(text, cb) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); cb(); } catch (e) { }
+            document.body.removeChild(ta);
+        }
+
+        const btcAddr = document.getElementById('btcAddr');
+        const btcCopy = document.getElementById('btcCopy');
+
+        function copyBtc() {
+            const text = btcAddr.textContent.trim();
+            const done = () => {
+                const dict = i18n[currentLang];
+                btcCopy.textContent = dict.copied_btn;
+                btcCopy.classList.add('copied');
+                setTimeout(() => {
+                    btcCopy.textContent = dict.copy_btn;
+                    btcCopy.classList.remove('copied');
+                }, 2000);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done).catch(() => fallback(text, done));
+            } else {
+                fallback(text, done);
+            }
+        }
+
+        btcCopy.addEventListener('click', copyBtc);
+        btcAddr.addEventListener('click', copyBtc);
+
+        const discordBtn = document.getElementById('discordBtn');
+        discordBtn.addEventListener('click', () => {
+            const text = 'papiniz';
+            const done = () => {
+                discordBtn.style.color = '#ff3333';
+                discordBtn.style.borderColor = '#ff3333';
+                setTimeout(() => {
+                    discordBtn.style.color = '';
+                    discordBtn.style.borderColor = '';
+                }, 1500);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done).catch(() => fallback(text, done));
+            } else {
+                fallback(text, done);
+            }
+        });
+
+        const cursorDot = document.getElementById('cursorDot');
+        const cursorRing = document.getElementById('cursorRing');
+        let mouseX = 0, mouseY = 0;
+        let ringX = 0, ringY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursorDot.style.left = `${mouseX}px`;
+            cursorDot.style.top = `${mouseY}px`;
+        });
+
+        function renderCursor() {
+            ringX += (mouseX - ringX) * 0.2;
+            ringY += (mouseY - ringY) * 0.2;
+            cursorRing.style.left = `${ringX}px`;
+            cursorRing.style.top = `${ringY}px`;
+            requestAnimationFrame(renderCursor);
+        }
+        renderCursor();
+
+        document.querySelectorAll('a, button, .glass-panel').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-active'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-active'));
+        });
+
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -3;
+                const rotateY = ((x - centerX) / centerX) * 3;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+
+        let easterEggKeys = '';
+        window.addEventListener('keydown', (e) => {
+            easterEggKeys += e.key.toLowerCase();
+            if (easterEggKeys.length > 5) easterEggKeys = easterEggKeys.slice(-5);
+            if (easterEggKeys.includes('neo')) {
+                document.documentElement.style.setProperty('--accent', '#7bd88f');
+                document.documentElement.style.setProperty('--accent-glow', 'rgba(123, 216, 143, 0.15)');
+                easterEggKeys = '';
+            }
+            if (easterEggKeys.includes('fud')) {
+                document.documentElement.style.setProperty('--accent', '#ff3333');
+                document.documentElement.style.setProperty('--accent-glow', 'rgba(255, 51, 51, 0.15)');
+                easterEggKeys = '';
+            }
+        });
+    </script>
+</body>
+
+</html>
