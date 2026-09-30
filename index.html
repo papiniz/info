@@ -1035,6 +1035,157 @@
             overflow-x: auto;
             white-space: pre;
         }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .project-card {
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: var(--transition);
+            transform-origin: top;
+        }
+
+        .project-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .project-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #fff;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .project-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .project-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .project-badge.private {
+            background: rgba(255, 51, 51, 0.08);
+            color: var(--accent);
+            border: 1px solid rgba(255, 51, 51, 0.2);
+        }
+
+        .project-badge.wip {
+            background: rgba(247, 147, 26, 0.08);
+            color: #f7931a;
+            border: 1px solid rgba(247, 147, 26, 0.2);
+        }
+
+        .project-badge.released {
+            background: rgba(123, 216, 143, 0.08);
+            color: #7bd88f;
+            border: 1px solid rgba(123, 216, 143, 0.2);
+        }
+
+        .project-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .mobile-sidebar-btn {
+            display: none;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            cursor: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            transition: var(--transition);
+            border-radius: 16px;
+        }
+
+        .mobile-sidebar-btn:hover {
+            background: rgba(255, 51, 51, 0.05);
+        }
+
+        .mobile-toggle-icon {
+            color: var(--accent);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 11px;
+        }
+
+        .mobile-toggle-icon.open {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-collapsible {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .mobile-sidebar-btn {
+                display: flex;
+            }
+
+            .sidebar-collapsible {
+                display: none;
+                margin-top: 12px;
+            }
+
+            .sidebar-collapsible.open {
+                display: flex;
+            }
+
+            .sidebar {
+                gap: 0;
+            }
+        }
+
+        @keyframes countUp {
+            from { opacity: 0.3; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 
@@ -1086,40 +1237,46 @@
 
     <div class="container">
         <div class="sidebar">
-            <div class="profile-card glass-panel">
-                <div class="avatar-container">
-                    <div class="avatar-glow"></div>
-                    <img src="profile.png" alt="papiniz" class="avatar"
-                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzExMSIvPjwvc3ZnPg==';">
-                </div>
-                <div class="name">papiniz</div>
-                <div class="tagline">bilgi.cat</div>
-
-                <div style="display:flex; gap: 8px; justify-content:center; flex-wrap:wrap; margin-bottom: 24px;">
-                    <span class="tech-badge">C++</span>
-                    <span class="tech-badge">ASM</span>
-                    <span class="tech-badge">LUA</span>
-                    <span class="tech-badge">RE</span>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <div class="stat-val">4+</div>
-                        <div class="stat-label" data-i18n="stat_years">Years Exp</div>
+            <button class="mobile-sidebar-btn glass-panel" id="mobileSidebarBtn">
+                <span>papiniz — Profile</span>
+                <span class="mobile-toggle-icon" id="mobileSidebarIcon">▼</span>
+            </button>
+            <div class="sidebar-collapsible" id="sidebarCollapsible">
+                <div class="profile-card glass-panel">
+                    <div class="avatar-container">
+                        <div class="avatar-glow"></div>
+                        <img src="profile.png" alt="papiniz" class="avatar"
+                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzExMSIvPjwvc3ZnPg==';">
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-val">18+</div>
-                        <div class="stat-label" data-i18n="stat_projects">Projects</div>
-                    </div>
-                </div>
+                    <div class="name">papiniz</div>
+                    <div class="tagline">bilgi.cat</div>
 
-                <div style="display:flex; justify-content:center;">
-                    <button id="discordBtn" class="social-btn" title="Copy Discord Username">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M20.3 4.5A19.8 19.8 0 0 0 15.4 3c-.2.4-.4.9-.6 1.3a18.3 18.3 0 0 0-5.5 0c-.2-.4-.4-.9-.6-1.3a19.8 19.8 0 0 0-4.9 1.5C.7 8.7-.1 12.7.3 16.7a20 20 0 0 0 6 3c.5-.6.9-1.3 1.3-2-.7-.3-1.4-.6-2-1l.5-.4a14.3 14.3 0 0 0 12.3 0l.5.4c-.6.4-1.3.7-2 1 .4.7.8 1.4 1.3 2a20 20 0 0 0 6-3c.5-4.6-.7-8.6-3.9-12.2ZM8.3 14.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.1 1.1 2.1 2.4-.9 2.4-2.1 2.4Zm7.4 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.1 1.1 2.1 2.4-.9 2.4-2.1 2.4Z" />
-                        </svg>
-                    </button>
+                    <div style="display:flex; gap: 8px; justify-content:center; flex-wrap:wrap; margin-bottom: 24px;">
+                        <span class="tech-badge">C++</span>
+                        <span class="tech-badge">ASM</span>
+                        <span class="tech-badge">LUA</span>
+                        <span class="tech-badge">RE</span>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-val" data-count="4" data-suffix="+">4+</div>
+                            <div class="stat-label" data-i18n="stat_years">Years Exp</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-val" data-count="18" data-suffix="+">18+</div>
+                            <div class="stat-label" data-i18n="stat_projects">Projects</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:center;">
+                        <button id="discordBtn" class="social-btn" title="Copy Discord Username">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M20.3 4.5A19.8 19.8 0 0 0 15.4 3c-.2.4-.4.9-.6 1.3a18.3 18.3 0 0 0-5.5 0c-.2-.4-.4-.9-.6-1.3a19.8 19.8 0 0 0-4.9 1.5C.7 8.7-.1 12.7.3 16.7a20 20 0 0 0 6 3c.5-.6.9-1.3 1.3-2-.7-.3-1.4-.6-2-1l.5-.4a14.3 14.3 0 0 0 12.3 0l.5.4c-.6.4-1.3.7-2 1 .4.7.8 1.4 1.3 2a20 20 0 0 0 6-3c.5-4.6-.7-8.6-3.9-12.2ZM8.3 14.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.1 1.1 2.1 2.4-.9 2.4-2.1 2.4Zm7.4 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.1 1.1 2.1 2.4-.9 2.4-2.1 2.4Z" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1148,14 +1305,9 @@
                 <div>
                     <div class="section-title" data-i18n="title_about">About Me</div>
                     <div class="bio-text glass-panel" data-i18n="bio">
-                        Deep exploration of low-level Windows internals, reverse engineering, and offensive security
-                        research.
-                        <span class="highlight">I develop advanced evasion tools, custom obfuscators, and UEFI
-                            implementations.</span>
-                        Beyond code, I have advanced proficiency in visual design (Photoshop, Premiere) and game engine
-                        development (Unity).
-                        Operating strictly anonymously. Currently engineering a Linux-based OS designed for 100%
-                        anonymity.
+                        Windows kernel internals, reverse engineering, offensive security.
+                        <span class="highlight">I build evasion tools, custom obfuscators, and UEFI/kernel stuff.</span>
+                        Photoshop, Premiere, Unity on the side. Anonymous. Working on a Linux OS built for full anonymity.
                     </div>
                 </div>
 
@@ -1172,9 +1324,7 @@
                                 <line x1="12" y1="22.08" x2="12" y2="12"></line>
                             </svg>
                             <div class="exp-title" data-i18n="exp_uefi_title">Kernel & UEFI</div>
-                            <div class="exp-desc" data-i18n="exp_uefi_desc">Development of custom UEFI boot modules,
-                                driver
-                                mapping techniques, and manipulation of Windows kernel defenses (Patchguard/DSE).</div>
+                            <div class="exp-desc" data-i18n="exp_uefi_desc">Custom UEFI boot modules, manual driver mapping, PatchGuard/DSE bypass.</div>
                         </div>
                         <div class="exp-card glass-panel">
                             <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1182,10 +1332,7 @@
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                             </svg>
                             <div class="exp-title" data-i18n="exp_fud_title">Evasion & FUD</div>
-                            <div class="exp-desc" data-i18n="exp_fud_desc">Implementation of advanced evasion
-                                methodologies
-                                to bypass dynamic/static analysis, ensuring payloads remain Fully Undetectable (FUD).
-                            </div>
+                            <div class="exp-desc" data-i18n="exp_fud_desc">Bypassing AV/EDR through custom evasion — static and dynamic. Payloads stay FUD.</div>
                         </div>
                         <div class="exp-card glass-panel">
                             <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1196,40 +1343,93 @@
                                 <circle cx="12" cy="12" r="4"></circle>
                             </svg>
                             <div class="exp-title" data-i18n="exp_malware_title">Malware Analysis & RE</div>
-                            <div class="exp-desc" data-i18n="exp_malware_desc">Expert in detecting complex malware,
-                                decompiling binaries, and deobfuscating heavily protected payloads.</div>
+                            <div class="exp-desc" data-i18n="exp_malware_desc">Detecting and analyzing real malware, decompiling binaries, stripping obfuscation layers.</div>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <div class="section-title" data-i18n="title_tools">Offensive Tooling</div>
-                    <div class="tools-list">
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>PatchGuard Patcher</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Custom Antivirus</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Local Signer Patcher</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Lua Obfuscator</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Lua Deobfuscator</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Private Cheat Reversals
+                    <div class="section-title" data-i18n="title_projects">Projects</div>
+                    <div class="projects-grid">
+                        <div class="project-card glass-panel">
+                            <div class="project-title">Evasion Engine</div>
+                            <div class="project-desc">Modular AV/EDR bypass combining multiple techniques. FUD across Defender, Kaspersky, ESET.</div>
+                            <div class="project-tags"><span class="tech-badge">C++</span><span class="tech-badge">Win32</span></div>
                         </div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>P2C Software Cracks</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Anti-Cheat Emulators</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>C++ Protector</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Auth System</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Vanguard Emulator</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>HWID Spoofer</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Stealer Framework</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Evasion Engine</div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="section-title" data-i18n="title_creative">Creative Software / Engine</div>
-                    <div class="tools-list">
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Unity — 3D FPS</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Unity — 2D Turn-Based</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Photoshop — Advanced</div>
-                        <div class="tool-item glass-panel"><span class="tool-bullet">»</span>Premiere Pro — Advanced
+                        <div class="project-card glass-panel">
+                            <div class="project-title">PatchGuard Patcher</div>
+                            <div class="project-desc">Disables PatchGuard checks at runtime. System stays stable after ring-0 modifications.</div>
+                            <div class="project-tags"><span class="tech-badge">C++</span><span class="tech-badge">Kernel</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">HWID Spoofer</div>
+                            <div class="project-desc">Driver-level hardware ID spoofing. HWID bans become permanently ineffective.</div>
+                            <div class="project-tags"><span class="tech-badge">C++</span><span class="tech-badge">Driver</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">Vanguard Emulator</div>
+                            <div class="project-desc">Ring-0 emulation of Riot's kernel driver. Bypasses Vanguard's presence requirements.</div>
+                            <div class="project-tags"><span class="tech-badge">C++</span><span class="tech-badge">Kernel</span><span class="tech-badge">RE</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">Local Signer Patcher</div>
+                            <div class="project-desc">Patches DSE without a UEFI flash. Unsigned drivers load without triggering integrity checks.</div>
+                            <div class="project-tags"><span class="tech-badge">C++</span><span class="tech-badge">Kernel</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">Stealer Framework</div>
+                            <div class="project-desc">Silent credential and browser data exfiltration. Encrypted C2 delivery.</div>
+                            <div class="project-tags"><span class="tech-badge">C++</span><span class="tech-badge">Win32</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">Anti-Cheat Emulator</div>
+                            <div class="project-desc">Emulates EAC/BE kernel behavior. Used for bypass research and anti-cheat reverse engineering.</div>
+                            <div class="project-tags"><span class="tech-badge">C++</span><span class="tech-badge">Kernel</span><span class="tech-badge">RE</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">C++ Protector</div>
+                            <div class="project-desc">Packs and obfuscates C++ binaries with a custom loader stub. Defeats static analysis.</div>
+                            <div class="project-tags"><span class="tech-badge">C++</span><span class="tech-badge">ASM</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">Auth System</div>
+                            <div class="project-desc">HWID-bound licensing with server-side validation and anti-tamper protection.</div>
+                            <div class="project-tags"><span class="tech-badge">C++</span><span class="tech-badge">Crypto</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">Custom Antivirus</div>
+                            <div class="project-desc">Signature + behavioral detection engine built from scratch. Catches known and packed samples.</div>
+                            <div class="project-tags"><span class="tech-badge">C++</span><span class="tech-badge">Win32</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">Lua Obfuscator</div>
+                            <div class="project-desc">Multi-layer bytecode obfuscation with custom VM. Output defeats all known deobfuscators.</div>
+                            <div class="project-tags"><span class="tech-badge">Lua</span><span class="tech-badge">ASM</span><span class="tech-badge">VM</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">Lua Deobfuscator</div>
+                            <div class="project-desc">Reverses custom Lua VMs and common obfuscation schemes. Recovers original bytecode.</div>
+                            <div class="project-tags"><span class="tech-badge">Lua</span><span class="tech-badge">RE</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">Cheat RE</div>
+                            <div class="project-desc">Documented internals of multiple private cheats via static + dynamic reverse engineering.</div>
+                            <div class="project-tags"><span class="tech-badge">RE</span><span class="tech-badge">x64</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">P2C Loader Cracks</div>
+                            <div class="project-desc">Reversed and cracked auth/licensing systems in multiple pay-to-cheat loaders.</div>
+                            <div class="project-tags"><span class="tech-badge">RE</span><span class="tech-badge">C++</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">3D FPS</div>
+                            <div class="project-desc">Playable first-person shooter with custom physics, enemy AI, and full weapon system.</div>
+                            <div class="project-tags"><span class="tech-badge">Unity</span><span class="tech-badge">C#</span></div>
+                        </div>
+                        <div class="project-card glass-panel">
+                            <div class="project-title">2D Turn-Based</div>
+                            <div class="project-desc">Strategy game with turn-based combat and procedural map generation.</div>
+                            <div class="project-tags"><span class="tech-badge">Unity</span><span class="tech-badge">C#</span></div>
                         </div>
                     </div>
                 </div>
@@ -1323,7 +1523,7 @@
                         </svg>
                         <div style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#fff;"
                             data-i18n="drop_file">DRAG & DROP ANY FILE (PE / DLL / RAW)</div>
-                        <div style="font-size:11px; color:var(--text-muted);">or click to browse local filesystem</div>
+                        <div style="font-size:11px; color:var(--text-muted);">or click to browse</div>
                         <input type="file" id="entropyFileInput" style="display:none;">
                     </div>
                     <div>
@@ -1410,7 +1610,7 @@
                 <div class="tool-panel glass-panel" id="toolHashes" style="display:none;">
                     <div class="section-title" data-i18n="t_hashes">Cryptographic Hashes & Windows NTLM</div>
                     <textarea id="hashInput" class="cyber-textarea" rows="3"
-                        placeholder="Enter plaintext, password, or payload string to hash in real-time..."></textarea>
+                        placeholder="Enter text or paste hex payload to hash..."></textarea>
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         <div class="hash-row">
                             <span class="hash-tag">NTLM</span>
@@ -1573,8 +1773,7 @@
 
                 <div class="tool-panel glass-panel" id="toolCrackme" style="display:none;">
                     <div class="section-title" data-i18n="cm_title">RE Crackme Challenge</div>
-                    <div style="font-size:12px; color:var(--text-secondary);" data-i18n="cm_desc">Reverse engineer the
-                        verification algorithm below to recover the dynamic session unlock key.</div>
+                    <div style="font-size:12px; color:var(--text-secondary);" data-i18n="cm_desc">Reverse engineer the algorithm below and crack the key.</div>
 
                     <div
                         style="background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:8px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
@@ -1640,9 +1839,7 @@
                         <div
                             style="font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--text-muted); margin-bottom:4px;">
                             DEBUGGER CONSOLE & REGISTER STACK</div>
-                        <div class="crackme-console" id="cmConsole">[DEBUGGER] Attached to process. Target function
-                            crackme_verify loaded at 0x00401000.
-                            [DEBUGGER] Awaiting key verification...</div>
+                        <div class="crackme-console" id="cmConsole">[DBG] Initializing...</div>
                     </div>
                 </div>
             </div>
@@ -1667,6 +1864,7 @@
                         document.body.classList.remove('locked');
                         setTimeout(() => {
                             splash.remove();
+                            animateCounters();
                         }, 800);
                     }, 900);
                 }, 700);
@@ -1796,16 +1994,15 @@
                 stat_years: "Years Exp",
                 stat_projects: "Projects",
                 title_about: "About Me",
-                bio: "Deep exploration of low-level Windows internals, reverse engineering, and offensive security research. <span class='highlight'>I develop advanced evasion tools, custom obfuscators, and UEFI implementations.</span> Beyond code, I have advanced proficiency in visual design and game engine development. Operating strictly anonymously. Currently engineering a Linux-based OS designed for 100% anonymity.",
+                bio: "Windows kernel internals, reverse engineering, offensive security. <span class='highlight'>I build evasion tools, custom obfuscators, and UEFI/kernel stuff.</span> Photoshop, Premiere, Unity on the side. Anonymous. Working on a Linux OS built for full anonymity.",
                 title_expertise: "Core Expertise",
                 exp_uefi_title: "Kernel & UEFI",
-                exp_uefi_desc: "Development of custom UEFI boot modules, driver mapping techniques, and manipulation of Windows kernel defenses (Patchguard/DSE).",
+                exp_uefi_desc: "Custom UEFI boot modules, manual driver mapping, PatchGuard/DSE bypass.",
                 exp_fud_title: "Evasion & FUD",
-                exp_fud_desc: "Implementation of advanced evasion methodologies to bypass dynamic/static analysis, ensuring payloads remain Fully Undetectable (FUD).",
+                exp_fud_desc: "Bypassing AV/EDR through custom evasion — static and dynamic. Payloads stay FUD.",
                 exp_malware_title: "Malware Analysis & RE",
-                exp_malware_desc: "Expert in detecting complex malware, decompiling binaries, and deobfuscating heavily protected payloads.",
-                title_tools: "Offensive Tooling",
-                title_creative: "Creative Software / Engine",
+                exp_malware_desc: "Detecting and analyzing real malware, decompiling binaries, stripping obfuscation layers.",
+                title_projects: "Projects",
                 title_support: "Support",
                 btc_label: "Bitcoin Address",
                 copy_btn: "COPY",
@@ -1823,7 +2020,7 @@
                 pg_strength: "STRENGTH",
                 pg_generate: "REGENERATE KEY",
                 cm_title: "RE Crackme Challenge",
-                cm_desc: "Reverse engineer the verification algorithm below to recover the dynamic session unlock key.",
+                cm_desc: "Reverse engineer the algorithm below and crack the key.",
                 cm_submit: "VERIFY KEY",
                 cm_new: "New Seed",
                 drop_file: "DRAG & DROP ANY FILE (PE / DLL / RAW)",
@@ -1838,16 +2035,15 @@
                 stat_years: "Yıl Deneyim",
                 stat_projects: "Proje",
                 title_about: "Hakkımda",
-                bio: "Low level Windows içyapısı, tersine mühendislik ve ofansif güvenlik araştırmaları. <span class='highlight'>Gelişmiş evasion araçları, özel obfuscatörler ve UEFI / Kernel hileleri geliştiriyorum.</span> Kod dışında Premiere Pro, Photoshop ve Unity konularında Orta-ileri düzeydeyim. Anonim kalmayı tercih ediyorum. Şu anda %100 anonimlik odaklı, Linux tabanlı özel bir işletim sistemi (OS) geliştiriyorum.",
+                bio: "Windows kernel internalleri, tersine mühendislik, ofansif güvenlik. <span class='highlight'>Evasion araçları, özel obfuscatörler ve UEFI/kernel modülleri geliştiriyorum.</span> Photoshop, Premiere, Unity. Anonim. Tam anonimlik için Linux tabanlı bir OS üzerinde çalışıyorum.",
                 title_expertise: "Temel Uzmanlık",
                 exp_uefi_title: "Kernel & UEFI",
-                exp_uefi_desc: "Özel UEFI boot modüllerinin geliştirilmesi, sürücü haritalama ve Windows çekirdek savunmalarının (Patchguard/DSE) manipülasyonu.",
+                exp_uefi_desc: "Özel UEFI boot modülleri, manuel driver mapping, PatchGuard/DSE bypass.",
                 exp_fud_title: "Evasion & FUD",
-                exp_fud_desc: "Dinamik/statik analizleri atlatmak ve payload'ların Tamamen Tespit Edilemez (FUD) kalmasını sağlamak için gelişmiş yöntemler.",
+                exp_fud_desc: "AV/EDR atlatma, özel evasion teknikleri — statik ve dinamik. Payload FUD kalır.",
                 exp_malware_title: "Malware Analizi & RE",
-                exp_malware_desc: "Karmaşık virüsleri tespit etme, dosyaları decompile etme ve ağır şekilde korunan (obfuscated) kodları çözme konusunda uzman.",
-                title_tools: "Offensive Araçlar",
-                title_creative: "Kreatif Yazılım / Motor",
+                exp_malware_desc: "Gerçek malware analizi, binary decompile, obfuscation katmanlarını soyma.",
+                title_projects: "Projeler",
                 title_support: "Destek",
                 btc_label: "Bitcoin Adresi",
                 copy_btn: "KOPYALA",
@@ -1865,7 +2061,7 @@
                 pg_strength: "GÜVENLİK DÜZEYİ",
                 pg_generate: "ŞİFRE ÜRET",
                 cm_title: "RE Crackme Görevi",
-                cm_desc: "Aşağıdaki doğrulama algoritmasını tersine mühendislikle çözerek dinamik oturum anahtarını bul.",
+                cm_desc: "Aşağıdaki algoritmayı tersine çöz ve anahtarı kır.",
                 cm_submit: "ANAHTARI DOĞRULA",
                 cm_new: "Yeni Seed",
                 drop_file: "DOSYA SÜRÜKLE (PE / DLL / RAW)",
@@ -1880,16 +2076,15 @@
                 stat_years: "Jahre Erf.",
                 stat_projects: "Projekte",
                 title_about: "Über Mich",
-                bio: "Tiefe Erforschung von Windows-Interna auf niedriger Ebene, Reverse Engineering und offensive Sicherheitsforschung. <span class='highlight'>Ich entwickle fortschrittliche Evasion-Tools, benutzerdefinierte Obfuskatoren und UEFI-Implementierungen.</span> Streng anonym. Derzeit entwickle ich ein Linux-basiertes Betriebssystem für 100%ige Anonymität.",
+                bio: "Windows-Kernel-Interna, Reverse Engineering, offensive Sicherheit. <span class='highlight'>Ich baue Evasion-Tools, Obfuskatoren und UEFI/Kernel-Module.</span> Photoshop, Premiere, Unity nebenbei. Anonym. Entwickle ein Linux-OS für vollständige Anonymität.",
                 title_expertise: "Kernkompetenzen",
                 exp_uefi_title: "Kernel & UEFI",
-                exp_uefi_desc: "Entwicklung von benutzerdefinierten UEFI-Boot-Modulen, Treiber-Mapping und Manipulation von Windows-Kernel-Verteidigungen.",
+                exp_uefi_desc: "Eigene UEFI-Boot-Module, manuelles Treiber-Mapping, PatchGuard/DSE-Bypass.",
                 exp_fud_title: "Evasion & FUD",
-                exp_fud_desc: "Implementierung fortschrittlicher Umgehungsmethoden zur Umgehung dynamischer/statischer Analysen (FUD).",
+                exp_fud_desc: "AV/EDR-Umgehung durch eigene Evasion-Techniken — statisch und dynamisch. Payloads bleiben FUD.",
                 exp_malware_title: "Malware-Analyse & RE",
-                exp_malware_desc: "Experte für die Erkennung komplexer Malware, das Dekompilieren von Binärdateien und die Deobfuskation geschützter Payloads.",
-                title_tools: "Offensive Werkzeuge",
-                title_creative: "Kreative Software / Engine",
+                exp_malware_desc: "Echte Malware analysieren, Binärdateien dekompilieren, Obfuskationsschichten entfernen.",
+                title_projects: "Projekte",
                 title_support: "Unterstützen",
                 btc_label: "Bitcoin-Adresse",
                 copy_btn: "KOPIEREN",
@@ -1907,7 +2102,7 @@
                 pg_strength: "STÄRKE",
                 pg_generate: "NEU GENERIEREN",
                 cm_title: "RE Crackme Herausforderung",
-                cm_desc: "Analysieren Sie den Verifizierungsalgorithmus im Reverse-Engineering-Verfahren, um den dynamischen Schlüssel zu finden.",
+                cm_desc: "Analysiere den Algorithmus und knacke den Schlüssel.",
                 cm_submit: "SCHLÜSSEL PRÜFEN",
                 cm_new: "Neuer Seed",
                 drop_file: "DATEI ABLEGEN (PE / DLL / RAW)",
@@ -1922,16 +2117,15 @@
                 stat_years: "Лет опыта",
                 stat_projects: "Проекты",
                 title_about: "Обо Мне",
-                bio: "Глубокое изучение низкоуровневых механизмов Windows, реверс-инжиниринг и исследования в области наступательной безопасности. <span class='highlight'>Я разрабатываю передовые инструменты обхода, кастомные обфускаторы и UEFI модули.</span> Строго анонимно. В настоящее время разрабатываю ОС на базе Linux для 100% анонимности.",
+                bio: "Ядро Windows, реверс-инжиниринг, наступательная безопасность. <span class='highlight'>Пишу инструменты обхода, обфускаторы, UEFI/kernel-модули.</span> Photoshop, Premiere, Unity. Анонимно. Разрабатываю Linux-ОС для полной анонимности.",
                 title_expertise: "Основные компетенции",
                 exp_uefi_title: "Kernel & UEFI",
-                exp_uefi_desc: "Разработка пользовательских загрузочных модулей UEFI, методов маппинга драйверов и манипулирования защитой ядра Windows.",
+                exp_uefi_desc: "Свои UEFI-загрузчики, ручной маппинг драйверов, обход PatchGuard/DSE.",
                 exp_fud_title: "Evasion & FUD",
-                exp_fud_desc: "Внедрение передовых методологий уклонения для обхода динамического/статического анализа (FUD).",
+                exp_fud_desc: "Обход AV/EDR через кастомный evasion — статика и динамика. Пейлоады остаются FUD.",
                 exp_malware_title: "Анализ ВПО & RE",
-                exp_malware_desc: "Эксперт по обнаружению сложных вирусов, декомпиляции файлов и деобфускации сильно защищенного кода.",
-                title_tools: "Наступательные инструменты",
-                title_creative: "ПО и Движки",
+                exp_malware_desc: "Анализ настоящих вирусов, декомпиляция, снятие обфускации.",
+                title_projects: "Проекты",
                 title_support: "Поддержка",
                 btc_label: "Биткоин-адрес",
                 copy_btn: "КОПИРОВАТЬ",
@@ -1949,7 +2143,7 @@
                 pg_strength: "НАДЕЖНОСТЬ",
                 pg_generate: "СГЕНЕРИРОВАТЬ",
                 cm_title: "RE Crackme Челлендж",
-                cm_desc: "Исследуйте алгоритм проверки с помощью реверс-инжиниринга, чтобы найти динамический ключ сессии.",
+                cm_desc: "Разбери алгоритм и взломай ключ.",
                 cm_submit: "ПРОВЕРИТЬ КЛЮЧ",
                 cm_new: "Новый Seed",
                 drop_file: "ПЕРЕТАЩИТЕ ФАЙЛ (PE / DLL / RAW)",
@@ -1964,16 +2158,15 @@
                 stat_years: "年经验",
                 stat_projects: "项目数",
                 title_about: "关于我",
-                bio: "深入研究底层Windows内部机制、逆向工程和进攻性安全。<span class='highlight'>我开发高级规避工具、自定义混淆器和UEFI实现。</span> 严格保持匿名。目前正在开发一款旨在实现100%匿名的基于Linux的操作系统。",
+                bio: "Windows内核、逆向工程、进攻性安全。<span class='highlight'>开发规避工具、混淆器、UEFI/内核模块。</span> Photoshop、Premiere、Unity。匿名。正在开发追求完全匿名的Linux系统。",
                 title_expertise: "核心专长",
                 exp_uefi_title: "内核与UEFI",
-                exp_uefi_desc: "开发自定义UEFI引导模块、驱动程序映射技术以及操作Windows内核防御 (Patchguard/DSE)。",
+                exp_uefi_desc: "自定义UEFI引导模块，手动驱动映射，PatchGuard/DSE绕过。",
                 exp_fud_title: "规避与FUD",
-                exp_fud_desc: "实施高级规避方法以绕过动态/静态分析，确保有效载荷保持完全不可检测 (FUD)。",
+                exp_fud_desc: "通过自定义规避绕过AV/EDR——静态与动态。Payload保持FUD。",
                 exp_malware_title: "恶意软件分析与逆向",
-                exp_malware_desc: "精通复杂恶意软件检测、二进制文件反编译以及高度保护代码的去混淆。",
-                title_tools: "进攻性工具",
-                title_creative: "创意软件/引擎",
+                exp_malware_desc: "分析真实恶意软件，反编译二进制，剥除混淆层。",
+                title_projects: "项目",
                 title_support: "支持",
                 btc_label: "比特币地址",
                 copy_btn: "复制",
@@ -1991,7 +2184,7 @@
                 pg_strength: "强度",
                 pg_generate: "重新生成",
                 cm_title: "逆向工程 Crackme 挑战",
-                cm_desc: "对下方的验证算法进行逆向分析，找出会话对应的动态解锁密钥。",
+                cm_desc: "逆向分析算法，破解密钥。",
                 cm_submit: "验证密钥",
                 cm_new: "新种子",
                 drop_file: "拖放任何文件 (PE / DLL / RAW)",
@@ -2006,16 +2199,15 @@
                 stat_years: "שנות ניסיון",
                 stat_projects: "פרויקטים",
                 title_about: "עליי",
-                bio: "חקר מעמיק של קרביים של Windows, הנדסה הפוכה ומחקר אבטחה התקפי. <span class='highlight'>אני מפתח כלי התחמקות מתקדמים, אובפוסקטורים מותאמים אישית ויישומי UEFI.</span> פועל באופן אנונימי לחלוטין. כרגע מפתח מערכת הפעלה מבוססת Linux לאנונימיות של 100%.",
+                bio: "ליבת Windows, הנדסה הפוכה, אבטחה התקפית. <span class='highlight'>בונה כלי התחמקות, אובפוסקטורים, מודולי UEFI/ליבה.</span> Photoshop, Premiere, Unity בצד. אנונימי. עובד על Linux OS לאנונימיות מלאה.",
                 title_expertise: "מומחיות ליבה",
                 exp_uefi_title: "ליבה ו-UEFI",
-                exp_uefi_desc: "פיתוח מודולי אתחול UEFI, טכניקות מיפוי מנהלי התקנים ומניפולציה של הגנות ליבת Windows.",
+                exp_uefi_desc: "מודולי UEFI מותאמים, מיפוי ידני של דרייברים, עקיפת PatchGuard/DSE.",
                 exp_fud_title: "התחמקות ו-FUD",
-                exp_fud_desc: "יישום מתודולוגיות התחמקות מתקדמות לעקיפת ניתוח דינמי/סטטי (FUD).",
+                exp_fud_desc: "עקיפת AV/EDR דרך evasion מותאם — סטטי ודינמי. Payload נשאר FUD.",
                 exp_malware_title: "ניתוח נוזקות ו-RE",
-                exp_malware_desc: "מומחה באיתור נוזקות מורכבות, דיקומפילציה של קבצים ודה-אובפוסקציה של קוד מוגן.",
-                title_tools: "כלים התקפיים",
-                title_creative: "תוכנה ומנועים",
+                exp_malware_desc: "ניתוח נוזקות אמיתיות, דיקומפילציה, הסרת שכבות אובפוסקציה.",
+                title_projects: "פרויקטים",
                 title_support: "תמיכה",
                 btc_label: "כתובת ביטקוין",
                 copy_btn: "העתק",
@@ -2033,7 +2225,7 @@
                 pg_strength: "חוזק",
                 pg_generate: "צור מחדש",
                 cm_title: "אתגר RE Crackme",
-                cm_desc: "בצע הנדסה הפוכה לאלגוריתם האימות שלהלן כדי לחשוף את מפתח הנעילה הדינמי.",
+                cm_desc: "בצע הנדסה הפוכה לאלגוריתם ופצח את המפתח.",
                 cm_submit: "אמת מפתח",
                 cm_new: "סיד חדש",
                 drop_file: "גרור קובץ כלשהו (PE / DLL / RAW)",
@@ -2993,7 +3185,7 @@
                 detailEl.textContent = '32-bit checksum (8 hex chars)';
             } else {
                 typeEl.textContent = 'Unrecognized Pattern';
-                detailEl.textContent = `Length: ${len} chars. Neither standard hex hash nor known crypt/JWT format.`;
+                detailEl.textContent = `${len} chars — unknown format`;
             }
         }
         const idInput = document.getElementById('idInput');
@@ -3178,10 +3370,9 @@
                 cmKeyInput.style.borderColor = 'var(--border)';
             }
             if (cmConsole) {
-                cmConsole.textContent = `[DEBUGGER] Attached to crackme target process (PID 0x1337).
-[DEBUGGER] Dynamic session seed initialized: ${hexSeed}
-[DEBUGGER] Breakpoint established at 0x00401013 (CMP AX, [KEY]).
-[DEBUGGER] Ready. Disassemble the routine and input the computed key.`;
+                cmConsole.textContent = `[DBG] Process attached.
+[DBG] Seed: ${hexSeed}
+[DBG] BP @ 0x00401013 — Awaiting key input.`;
             }
         }
 
@@ -3195,7 +3386,7 @@
             if (!cmKeyInput) return;
             const val = cmKeyInput.value.trim();
             if (!val) {
-                appendCmLog('[-] [DEBUGGER] Input buffer empty. Enter candidate key.');
+                appendCmLog('[-] Empty input.');
                 return;
             }
             let parsed;
@@ -3209,7 +3400,7 @@
             }
 
             if (isNaN(parsed)) {
-                appendCmLog(`[-] [DEBUGGER] Failed to parse input token: "${val}"`);
+                appendCmLog(`[-] Bad input: "${val}"`);
                 return;
             }
 
@@ -3221,8 +3412,8 @@
             appendCmLog(`[*] REGISTER AX = ${expHex}  |  INPUT KEY = ${userHex} (${userKey})`);
 
             if (userKey === cmExpectedKey) {
-                appendCmLog(`[+] ZERO FLAG (ZF) = 1 (CMP MATCH CONFIRMED)`);
-                appendCmLog(`[+] EXPLOIT ROUTINE PASSED: Patch validated!`);
+                appendCmLog(`[+] ZF = 1 (CMP MATCH)`);
+                appendCmLog(`[+] Key accepted.`);
                 appendCmLog(`[+] CRACKME SOLVED! FLAG: FLAG{U_4R3_A_L4RP3R_${expHex}_xD}`);
                 if (cmStatusVal) {
                     cmStatusVal.textContent = 'UNLOCKED';
@@ -3230,9 +3421,9 @@
                 }
                 cmKeyInput.style.borderColor = '#7bd88f';
             } else {
-                appendCmLog(`[-] ZERO FLAG (ZF) = 0 (MISMATCH)`);
-                appendCmLog(`[-] ACCESS DENIED: Key validation failed for seed 0x${cmSeed.toString(16).toUpperCase().padStart(4, '0')}.`);
-                appendCmLog(`[-] HINT: Check the 16-bit left rotate (ROL 4) and XOR masks.`);
+                appendCmLog(`[-] ZF = 0 (MISMATCH)`);
+                appendCmLog(`[-] Wrong key for seed 0x${cmSeed.toString(16).toUpperCase().padStart(4, '0')}.`);
+                appendCmLog(`[-] Hint: check the ROL 4 and XOR masks.`);
                 if (cmStatusVal) {
                     cmStatusVal.textContent = 'LOCKED';
                     cmStatusVal.style.color = '#ff3333';
@@ -3267,6 +3458,37 @@
             });
         }
         initCrackme();
+
+        const mobileSidebarBtn = document.getElementById('mobileSidebarBtn');
+        const sidebarCollapsible = document.getElementById('sidebarCollapsible');
+        const mobileSidebarIcon = document.getElementById('mobileSidebarIcon');
+
+        if (mobileSidebarBtn) {
+            mobileSidebarBtn.addEventListener('click', () => {
+                const isOpen = sidebarCollapsible.classList.toggle('open');
+                mobileSidebarIcon.classList.toggle('open', isOpen);
+            });
+        }
+
+        function animateCounters() {
+            document.querySelectorAll('.stat-val[data-count]').forEach(el => {
+                const target = parseInt(el.dataset.count);
+                const suffix = el.dataset.suffix || '';
+                let current = 0;
+                const duration = 800;
+                const steps = 20;
+                const stepVal = target / steps;
+                const interval = duration / steps;
+                const timer = setInterval(() => {
+                    current = Math.min(current + stepVal, target);
+                    el.textContent = Math.floor(current) + suffix;
+                    if (current >= target) {
+                        el.textContent = target + suffix;
+                        clearInterval(timer);
+                    }
+                }, interval);
+            });
+        }
 
         const cursorDot = document.getElementById('cursorDot');
         const cursorRing = document.getElementById('cursorRing');
